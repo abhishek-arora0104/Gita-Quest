@@ -38,7 +38,7 @@
 
   /* Fonts */
   --font-sans: var(--font-inter);
-  --font-serif: var(--font-cormorant);
+  --font-serif: var(--font-cormorant), var(--font-noto-serif-devanagari);
 
   /* Radius */
   --radius-card: 1rem;

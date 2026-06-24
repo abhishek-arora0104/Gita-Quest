@@ -1,6 +1,6 @@
 # Gita Quest — Project Context
 
-> Last updated: Review fixes complete; deployment pending
+> Last updated: Hindi localization complete and validated
 > Date: 2026-06-24
 
 ---
@@ -235,6 +235,57 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 
 ---
 
+## Hindi Localization — COMPLETE ✅
+
+**Goal:** Add full English/Hindi support with SEO-friendly locale URLs (`/en/...` and `/hi/...`) and a navbar language switcher.
+
+**Status:** Done · `npm run lint`, `npx tsc --noEmit`, and `npm run build` all pass. All locale routes return 200 and render the correct language. Content integrity verified: 18 chapters × 25 quiz questions (10 easy / 10 medium / 5 hard) in both locales, with matching slugs.
+
+**Architecture:**
+- i18n config/helpers:
+  - `src/lib/i18n/config.ts` — locale types, path helpers (`getLocaleFromPath`, `stripLocaleFromPath`, `withLocale`), default locale.
+  - `src/lib/i18n/server.ts` — `getRequestLocale()` reads locale from the `x-gita-locale` header set by the proxy.
+  - `src/lib/i18n/dictionary.ts` — full English/Hindi UI dictionary (`getDictionary(locale)` returns strongly-typed strings). Covers nav, footer, common, home, about, chapters, chapter, quiz, dashboard, reflection, auth, and badge labels.
+- `src/proxy.ts` recognizes `/en` and `/hi`, sets `x-gita-locale`, persists the `gita-locale` cookie (1 year), and rewrites locale-prefixed URLs to the existing App Router pages. `/` redirects to the cookie/default locale. Bare paths (no locale) redirect to the preferred locale.
+- Supabase route protection (`src/lib/supabase/middleware.ts`) strips the locale prefix before matching protected/auth routes and redirects to locale-aware login URLs.
+- Locale is resolved once in the root layout (`<html lang={locale}>`) and threaded down to `SiteShell` → `Navbar`/`Footer`, avoiding duplicate header reads.
+- `LanguageSwitcher` (client component) in the navbar preserves the current path when switching locale (uses `withLocale(pathname, target)`); renders `EN | हिन्दी` (desktop) / compact `EN | HI` (mobile).
+
+**Localized surfaces (all fully translated):**
+- Layout shell: `<html lang>`, Navbar, Footer, skip-link.
+- Homepage (hero, how-it-works, features, CTA) + locale-aware metadata + hreflang.
+- About page (intro + 4 feature cards).
+- Chapters library page (title, subtitle, available/coming-soon badges, reading time).
+- Chapter detail page (breadcrumb, header, all section labels, reflection, quiz CTA, next-chapter) + localized JSON-LD `inLanguage` + hreflang alternates + canonical.
+- Quiz page + `QuizEngine` (question counter, difficulty badge, answer states, explanations, check/next/results flow, live score) + `QuizResults` (score banner, XP, level-up, badges, streak, guest signup, retake/next actions). Quiz pages are `noindex`.
+- Dashboard (welcome, stats, XP bar, streak, chapter progress, badges) + all gamification components (`XPBar`, `StreakCounter`, `BadgeGrid`, `DailyLoginButton`).
+- `ReflectionForm`.
+- Auth: login, signup, forgot-password, reset-password, confirm pages + `LoginForm`, `SignupForm`, `ForgotPasswordForm`, `ResetPasswordForm`, `OAuthButtons`.
+- Badge names/descriptions localized via a `badges` dictionary section (used in both `BadgeGrid` and `QuizResults`).
+
+**Content:**
+- Locale-aware content registry in `src/lib/content/index.ts`: `chaptersByLocale`, `getAllChapters(locale)`, `getChapterBySlugForLocale`, `getChapterByNumberForLocale`, `getNextChapterForLocale`, `getLibraryList(locale)`.
+- English chapters: 18 files under `src/lib/content/chapters/`.
+- Hindi chapters: `src/lib/content/hi/chapters.ts` — all 18 chapters + 25-question Hindi quizzes, authored in-repo from curated Hindi chapter plans. Hindi reuses the English slug structure so routes stay stable across locales.
+
+**SEO:**
+- Localized `generateMetadata` on homepage, about, chapters list, chapter detail, and quiz pages.
+- hreflang alternates (`en`, `hi`, `x-default`) on homepage, about, chapters list, and chapter pages.
+- Canonical URLs point to the locale-specific URL.
+- `sitemap.ts` emits 42 URLs (2 home + 2 about + 2 chapters-list + 36 chapter pages), each with `alternates.languages` for both locales.
+- `robots.ts` disallows auth/dashboard/profile for both bare and locale-prefixed paths; quiz pages carry per-page `noindex`.
+
+**Policy note:**
+- A bulk external translation attempt was rejected because it would send chapter/quiz content to Google Translate. Hindi content is authored directly in-repo. A human Hindi copy pass is still recommended before public launch.
+
+**Verified:**
+- `npm run lint`, `npx tsc --noEmit`, `npm run build` all pass.
+- Routes `/en`, `/hi`, `/en/chapters`, `/hi/chapters`, `/en/about`, `/hi/about`, `/en/chapters/[slug]`, `/hi/chapters/[slug]`, and both quiz routes return 200.
+- `<html lang>` switches correctly; hero/section/chapter content renders in the right language; hreflang + canonical present and correct; quiz pages `noindex`; sitemap has both locales; language switcher preserves the current path; `gita-locale` cookie persists.
+- Content integrity: 18 chapters × 25 quiz questions (10/10/5) per locale; slug parity between `en` and `hi`.
+
+---
+
 ## Next Steps
 
 1. ~~SEO pass~~ ✅
@@ -242,5 +293,6 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 3. ~~README.md~~ ✅
 4. ~~CONTENT_GUIDE.md~~ ✅
 5. ~~Write remaining 15 chapters~~ ✅
-6. Deploy to Vercel / production
-7. Submit Google OAuth app for verification (before public launch)
+6. ~~Finish Hindi localization~~ ✅
+7. Deploy to Vercel / production
+8. Submit Google OAuth app for verification (before public launch)

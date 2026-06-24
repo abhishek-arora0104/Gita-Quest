@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getChapterBySlug, writtenChapterSlugs } from "@/lib/content";
+import { getChapterBySlugForLocale, writtenChapterSlugs } from "@/lib/content";
 import { QuizEngine } from "@/components/quiz/QuizEngine";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getRequestLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionary";
 
 export function generateStaticParams() {
   return writtenChapterSlugs.map((slug) => ({ slug }));
@@ -15,12 +17,16 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const chapter = getChapterBySlug(slug);
+  const locale = await getRequestLocale();
+  const chapter = getChapterBySlugForLocale(slug, locale);
   if (!chapter) return {};
+  const t = getDictionary(locale);
   return {
-    title: `Quiz: ${chapter.title}`,
-    description: `Test your understanding of Chapter ${chapter.number}: ${chapter.title} with 25 questions.`,
-    robots: { index: false }, // quizzes shouldn't be indexed
+    title: `${t.quiz.titlePrefix}: ${chapter.title}`,
+    description: locale === "hi"
+      ? `अध्याय ${chapter.number}: ${chapter.title} की समझ जांचें — 25 प्रश्न।`
+      : `Test your understanding of Chapter ${chapter.number}: ${chapter.title} with 25 questions.`,
+    robots: { index: false },
   };
 }
 
@@ -30,7 +36,9 @@ export default async function QuizPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const chapter = getChapterBySlug(slug);
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
+  const chapter = getChapterBySlugForLocale(slug, locale);
   if (!chapter) notFound();
 
   const user = await getCurrentUser();
@@ -47,36 +55,36 @@ export default async function QuizPage({
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-ink-muted">
         <Link
-          href={`/chapters/${chapter.slug}`}
+          href={`/${locale}/chapters/${chapter.slug}`}
           className="hover:text-saffron"
         >
-          ← Back to {chapter.title}
+          ← {t.quiz.backTo} {chapter.title}
         </Link>
       </nav>
 
       <header className="text-center">
         <p className="font-serif text-sm font-semibold uppercase tracking-wide text-saffron">
-          Chapter {chapter.number} · Quiz
+          {t.common.chapterWord} {chapter.number} · {t.quiz.titlePrefix}
         </p>
         <h1 className="mt-2 font-serif text-3xl font-bold text-maroon sm:text-4xl">
           {chapter.title}
         </h1>
         <p className="mt-2 text-ink-soft">
-          {chapter.quiz.length} questions · instant feedback after each answer
+          {chapter.quiz.length} {t.quiz.questions} · {t.quiz.instantFeedback}
         </p>
       </header>
 
       {!user ? (
         <div className="mt-8 rounded-card border border-gold/30 bg-parchment/60 p-6 text-center">
           <p className="text-ink-soft">
-            You can take this quiz to practice, but you&apos;ll need to{" "}
+            {t.quiz.guestPrefix}{" "}
             <Link
-              href="/auth/login"
+              href={`/${locale}/auth/login`}
               className="font-medium text-saffron hover:underline"
             >
-              log in
+              {t.nav.login}
             </Link>{" "}
-            to save your score, earn XP, and unlock badges.
+            {t.quiz.guestSuffix}
           </p>
         </div>
       ) : null}
@@ -86,15 +94,14 @@ export default async function QuizPage({
           chapterNumber={chapter.number}
           chapterSlug={chapter.slug}
           questions={questionsForClient}
-          // Correct answers + explanations are passed for client-side scoring.
-          // This is fine for an educational quiz; the server action re-scores
-          // against the source of truth to prevent tampering.
           answerKey={chapter.quiz.map((q) => ({
             id: q.id,
             correctIndex: q.correctIndex,
             explanation: q.explanation,
           }))}
           authenticated={Boolean(user)}
+          t={t}
+          locale={locale}
         />
       </div>
     </div>

@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { NavbarClient } from "./NavbarClient";
+import { getDictionary } from "@/lib/i18n/dictionary";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import type { Locale } from "@/lib/i18n/config";
 
-const navLinks = [
-  { href: "/chapters", label: "Chapters" },
-  { href: "/about", label: "About" },
-];
+export async function Navbar({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale);
+  const navLinks = [
+    { href: `/${locale}/chapters`, label: t.nav.chapters },
+    { href: `/${locale}/about`, label: t.nav.about },
+  ];
 
-export function Navbar() {
   return (
     <>
       {/* Skip-to-content link for keyboard accessibility */}
@@ -14,7 +18,7 @@ export function Navbar() {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-saffron focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
       >
-        Skip to main content
+        {t.nav.skip}
       </a>
       <header className="sticky top-0 z-40 border-b border-gold/20 bg-cream/90 backdrop-blur-md">
       <nav
@@ -22,7 +26,7 @@ export function Navbar() {
         aria-label="Primary"
       >
         <Link
-          href="/"
+          href={`/${locale}`}
           className="flex items-center gap-2 font-serif text-xl font-semibold text-maroon"
         >
           <span
@@ -44,14 +48,29 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          <NavbarClient />
+          <LanguageSwitcher locale={locale} />
+          <NavbarClient locale={locale} />
         </div>
 
         {/* Mobile: just the auth/menu button */}
-        <div className="md:hidden">
-          <NavbarClient />
+        <div className="flex items-center gap-2 md:hidden">
+          <LanguageSwitcher locale={locale} compact />
+          <NavbarClient locale={locale} />
         </div>
       </nav>
+
+      {/* Mobile bottom nav strip */}
+      <div className="flex border-t border-gold/10 bg-cream/50 px-4 py-2 md:hidden gap-6 justify-center">
+        {navLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="text-sm font-medium text-ink-soft transition-colors hover:text-saffron"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
     </header>
     </>
   );

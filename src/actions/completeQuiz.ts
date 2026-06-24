@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getChapterByNumber } from "@/lib/content";
+import { getChapterByNumberForLocale } from "@/lib/content";
 import {
   XP_REWARDS,
   computeLevel,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/gamification/xp";
 import { refreshProfile, evaluateAndAwardBadges } from "./markSummaryRead";
 import { BADGES_BY_ID } from "@/lib/gamification/badges";
+import type { Locale } from "@/lib/i18n/config";
 
 export interface QuizResult {
   ok: boolean;
@@ -40,11 +41,13 @@ export interface QuizResult {
 export async function completeQuiz(
   chapterNumber: number,
   answers: (number | null)[],
+  locale: Locale = "en",
+  clientDate?: string,
 ): Promise<QuizResult> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  const chapter = getChapterByNumber(chapterNumber);
+  const chapter = getChapterByNumberForLocale(chapterNumber, locale);
   if (!chapter) return { ok: false, error: "Chapter not found" };
 
   const supabase = await createClient();
@@ -165,7 +168,7 @@ export async function completeQuiz(
   const xpEarned = xpEntries.reduce((s, e) => s + e.amount, 0);
 
   // ── 4. Refresh profile (totals, level, streak). ──
-  await refreshProfile(supabase, user.id);
+  await refreshProfile(supabase, user.id, clientDate);
 
   // ── 5. Evaluate badges. ──
   const newBadgeIds = await evaluateAndAwardBadges(supabase, user.id);

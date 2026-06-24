@@ -6,8 +6,11 @@ import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
+import { getDictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/config";
 
-export function SignupForm() {
+export function SignupForm({ locale = "en" }: { locale?: Locale }) {
+  const t = getDictionary(locale);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -44,19 +47,18 @@ export function SignupForm() {
   if (emailSent) {
     return (
       <div className="rounded-2xl border border-leaf/30 bg-leaf/5 p-6 text-center">
-        <p className="text-lg font-semibold text-leaf">Check your email</p>
+        <p className="text-lg font-semibold text-leaf">{t.auth.checkEmail}</p>
         <p className="mt-2 text-sm text-ink-soft">
-          We&apos;ve sent a verification link to <strong>{email}</strong>. Click the
-          link to activate your account.
+          {t.auth.emailSent} <strong>{email}</strong>
         </p>
         <p className="mt-4 text-xs text-ink-muted">
-          Didn&apos;t receive it? Check your spam folder or{" "}
+          {t.auth.resend}{" "}
           <button
             type="button"
             onClick={() => setEmailSent(false)}
             className="font-medium text-saffron hover:underline"
           >
-            try again
+            {t.auth.tryAgain}
           </button>
           .
         </p>
@@ -66,11 +68,11 @@ export function SignupForm() {
 
   return (
     <div>
-      <OAuthButtons />
+      <OAuthButtons locale={locale} />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Display name"
+          label={t.auth.displayName}
           name="username"
           type="text"
           autoComplete="username"
@@ -80,7 +82,7 @@ export function SignupForm() {
           required
         />
         <Input
-          label="Email"
+          label={t.auth.email}
           name="email"
           type="email"
           autoComplete="email"
@@ -90,7 +92,7 @@ export function SignupForm() {
           required
         />
         <Input
-          label="Password"
+          label={t.auth.password}
           name="password"
           type="password"
           autoComplete="new-password"
@@ -108,13 +110,13 @@ export function SignupForm() {
         )}
 
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
-          {loading ? "Creating account…" : "Create account"}
+          {loading ? t.auth.creating : t.auth.create}
         </Button>
 
         <p className="text-center text-sm text-ink-soft">
-          Already have an account?{" "}
-          <Link href="/auth/login" className="font-medium text-saffron hover:underline">
-            Log in
+          {t.auth.alreadyAccount}{" "}
+          <Link href={`/${locale}/auth/login`} className="font-medium text-saffron hover:underline">
+            {t.nav.login}
           </Link>
         </p>
       </form>

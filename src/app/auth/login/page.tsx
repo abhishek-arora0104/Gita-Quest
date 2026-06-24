@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { LoginForm } from "./LoginForm";
+import { getRequestLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionary";
 
 export const metadata: Metadata = {
   title: "Log in",
@@ -12,19 +14,21 @@ export default async function LoginPage({
   searchParams: Promise<{ redirectTo?: string }>;
 }) {
   const { redirectTo } = await searchParams;
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-16 sm:px-6">
       <div className="text-center">
         <h1 className="font-serif text-3xl font-bold text-maroon">
-          Welcome back
+          {t.auth.loginTitle}
         </h1>
         <p className="mt-2 text-ink-soft">
-          Log in to continue your journey through the Gita.
+          {t.auth.loginBody}
         </p>
       </div>
       <div className="mt-8">
-        <LoginForm redirectTo={redirectTo} />
+        <LoginForm redirectTo={redirectTo} locale={locale} />
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
+import { getDictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/config";
 
 function safeRedirectPath(path: string | undefined): string {
   if (!path || !path.startsWith("/") || path.startsWith("//")) {
@@ -15,9 +17,16 @@ function safeRedirectPath(path: string | undefined): string {
   return path;
 }
 
-export function LoginForm({ redirectTo }: { redirectTo?: string }) {
+export function LoginForm({
+  redirectTo,
+  locale = "en",
+}: {
+  redirectTo?: string;
+  locale?: Locale;
+}) {
+  const t = getDictionary(locale);
   const router = useRouter();
-  const destination = safeRedirectPath(redirectTo);
+  const destination = safeRedirectPath(redirectTo) || `/${locale}/dashboard`;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -46,11 +55,11 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
   return (
     <div>
-      <OAuthButtons redirectTo={destination} />
+      <OAuthButtons redirectTo={destination} locale={locale} />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Email"
+          label={t.auth.email}
           name="email"
           type="email"
           autoComplete="email"
@@ -61,7 +70,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
         />
         <div>
           <Input
-            label="Password"
+            label={t.auth.password}
             name="password"
             type="password"
             autoComplete="current-password"
@@ -72,10 +81,10 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           />
           <div className="mt-1.5 text-right">
             <Link
-              href="/auth/forgot-password"
+              href={`/${locale}/auth/forgot-password`}
               className="text-xs font-medium text-saffron hover:underline"
             >
-              Forgot password?
+              {t.auth.forgot}
             </Link>
           </div>
         </div>
@@ -87,13 +96,13 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
         )}
 
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
-          {loading ? "Logging in…" : "Log in"}
+          {loading ? t.auth.loggingIn : t.nav.login}
         </Button>
 
         <p className="text-center text-sm text-ink-soft">
-          New here?{" "}
-          <Link href="/auth/signup" className="font-medium text-saffron hover:underline">
-            Create an account
+          {t.auth.newHere}{" "}
+          <Link href={`/${locale}/auth/signup`} className="font-medium text-saffron hover:underline">
+            {t.auth.createAccount}
           </Link>
         </p>
       </form>

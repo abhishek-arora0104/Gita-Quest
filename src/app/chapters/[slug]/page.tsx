@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  getChapterBySlug,
-  getNextChapter,
+  getChapterBySlugForLocale,
+  getNextChapterForLocale,
   writtenChapterSlugs,
 } from "@/lib/content";
 import { ChapterContent } from "@/components/chapter/ChapterContent";
@@ -12,6 +12,8 @@ import { ChapterActionsClient } from "@/components/chapter/ChapterActionsClient"
 import { getCurrentUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/Button";
+import { getRequestLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionary";
 
 export function generateStaticParams() {
   return writtenChapterSlugs.map((slug) => ({ slug }));
@@ -23,23 +25,34 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const chapter = getChapterBySlug(slug);
+  const locale = await getRequestLocale();
+  const chapter = getChapterBySlugForLocale(slug, locale);
   if (!chapter) return {};
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const url = `${siteUrl}/chapters/${chapter.slug}`;
+  const url = `${siteUrl}/${locale}/chapters/${chapter.slug}`;
+
+  const languages: Record<string, string> = {
+    en: `${siteUrl}/en/chapters/${slug}`,
+    hi: `${siteUrl}/hi/chapters/${slug}`,
+    "x-default": `${siteUrl}/en/chapters/${slug}`,
+  };
 
   return {
     title: chapter.seo.metaTitle,
     description: chapter.seo.metaDescription,
     keywords: chapter.seo.keywords,
-    alternates: { canonical: `/chapters/${chapter.slug}` },
+    alternates: {
+      canonical: `/${locale}/chapters/${chapter.slug}`,
+      languages,
+    },
     openGraph: {
       type: "article",
       title: chapter.seo.metaTitle,
       description: chapter.seo.metaDescription,
       url,
       siteName: "Gita Quest",
+      locale: locale === "hi" ? "hi_IN" : "en_US",
     },
     twitter: {
       card: "summary_large_image",
@@ -55,7 +68,9 @@ export default async function ChapterPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const chapter = getChapterBySlug(slug);
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
+  const chapter = getChapterBySlugForLocale(slug, locale);
   if (!chapter) notFound();
 
   // Optional: signed-in users see their progress on this chapter.
@@ -77,7 +92,7 @@ export default async function ChapterPage({
     progress = data;
   }
 
-  const nextChapter = getNextChapter(chapter.number);
+  const nextChapter = getNextChapterForLocale(chapter.number, locale);
 
   // JSON-LD structured data for SEO.
   const jsonLd = {
@@ -87,7 +102,7 @@ export default async function ChapterPage({
     description: chapter.seo.metaDescription,
     learningResourceType: "Article",
     educationalLevel: "Beginner",
-    inLanguage: "en",
+    inLanguage: locale,
     isPartOf: {
       "@type": "Book",
       name: "Bhagavad Gita",
@@ -111,29 +126,29 @@ export default async function ChapterPage({
         aria-label="Breadcrumb"
         className="mb-6 text-sm text-ink-muted"
       >
-        <Link href="/chapters" className="hover:text-saffron">
-          ← All chapters
+        <Link href={`/${locale}/chapters`} className="hover:text-saffron">
+          ← {t.chapter.allChapters}
         </Link>
       </nav>
 
       {/* Chapter header */}
       <header className="text-center">
         <p className="font-serif text-sm font-semibold uppercase tracking-wide text-saffron">
-          Chapter {chapter.number} · {chapter.sanskritName}
+          {t.common.chapterWord} {chapter.number} · {chapter.sanskritName}
         </p>
         <h1 className="mt-2 font-serif text-4xl font-bold text-maroon sm:text-5xl">
           {chapter.title}
         </h1>
         <p className="mt-3 text-lg italic text-ink-soft">{chapter.subtitle}</p>
         <p className="mt-3 text-sm text-ink-muted">
-          ⏱ {chapter.readingTimeMins} min read · ~{chapter.wordCount} words
+          ⏱ {chapter.readingTimeMins} {t.common.minRead} · ~{chapter.wordCount} {t.common.words}
         </p>
         {progress && (
           <p className="mt-3 text-sm font-medium text-leaf">
             {progress.quiz_completed
-              ? `✓ Quiz completed · best score ${progress.best_score}/${chapter.quiz.length}`
+              ? `✓ ${t.chapter.quizCompleted} · ${t.chapter.bestScore} ${progress.best_score}/${chapter.quiz.length}`
               : progress.summary_read
-                ? "✓ You've started this chapter"
+                ? `✓ ${t.chapter.started}`
                 : ""}
           </p>
         )}
@@ -145,43 +160,45 @@ export default async function ChapterPage({
 
       {/* Full summary */}
       <div className="mt-10">
-        <ChapterContent chapter={chapter} />
+        <ChapterContent chapter={chapter} t={t} />
       </div>
 
       {/* Reflection + actions */}
       <section className="mt-16 rounded-card border border-gold/20 bg-white/70 p-6 sm:p-8">
         <h3 className="font-serif text-2xl font-semibold text-maroon">
-          Reflect & take the quiz
+          {t.chapter.reflectQuiz}
         </h3>
         <p className="mt-2 text-ink-soft">
-          Save a short reflection (optional), then test what you learned.
+          {t.chapter.reflectQuizBody}
         </p>
 
         {user ? (
           <ReflectionForm
             chapterNumber={chapter.number}
             initialText={null}
+            t={t}
           />
         ) : (
           <div className="mt-4 rounded-xl bg-parchment p-4 text-sm text-ink-soft">
             <Link
-              href="/auth/login"
+              href={`/${locale}/auth/login`}
               className="font-medium text-saffron hover:underline"
             >
-              Log in
+              {t.nav.login}
             </Link>{" "}
-            to save your reflection and track your progress.
+            {t.chapter.loginToSave}
           </div>
         )}
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Button href={`/chapters/${chapter.slug}/quiz`} size="lg">
-            {progress?.quiz_completed ? "Retake quiz" : "Start the quiz →"}
+          <Button href={`/${locale}/chapters/${chapter.slug}/quiz`} size="lg">
+            {progress?.quiz_completed ? t.chapter.retakeQuiz : t.chapter.startQuiz}
           </Button>
           {user && (
             <ChapterActionsClient
               chapterNumber={chapter.number}
               alreadyRead={progress?.summary_read ?? false}
+              locale={locale}
             />
           )}
         </div>
@@ -190,21 +207,21 @@ export default async function ChapterPage({
       {/* Next chapter */}
       {nextChapter && (
         <nav
-          aria-label="Next chapter"
+          aria-label={t.common.nextChapter}
           className="mt-12 rounded-card bg-gradient-to-br from-maroon to-saffron p-6 text-center text-cream sm:p-8"
         >
           <p className="text-sm uppercase tracking-wide opacity-80">
-            Up next · Chapter {nextChapter.number}
+            {t.common.nextChapter} · {t.common.chapterWord} {nextChapter.number}
           </p>
           <p className="mt-1 font-serif text-2xl font-semibold">
             {nextChapter.title}
           </p>
           <p className="mt-1 opacity-90">{nextChapter.subtitle}</p>
           <Link
-            href={`/chapters/${nextChapter.slug}`}
+            href={`/${locale}/chapters/${nextChapter.slug}`}
             className="mt-4 inline-block rounded-full bg-cream px-5 py-2 text-sm font-semibold text-maroon transition-transform hover:scale-105"
           >
-            Continue →
+            {t.chapter.continue}
           </Link>
         </nav>
       )}

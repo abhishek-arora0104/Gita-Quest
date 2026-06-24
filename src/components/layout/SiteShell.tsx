@@ -1,12 +1,21 @@
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionary";
 
-export function SiteShell({ children }: { children: React.ReactNode }) {
+export async function SiteShell({
+  children,
+  locale,
+}: {
+  children: React.ReactNode;
+  locale: Locale;
+}) {
+  const t = getDictionary(locale);
   return (
     <>
-      <Navbar />
+      <Navbar locale={locale} />
       <main id="main-content" className="flex-1">{children}</main>
-      <Footer />
+      <Footer locale={locale} t={t} />
     </>
   );
 }

@@ -12,6 +12,7 @@ import { evaluateBadges } from "@/lib/gamification/badges";
  */
 export async function markSummaryRead(
   chapterNumber: number,
+  clientDate?: string,
 ): Promise<{ ok: boolean; error?: string; xpAwarded?: number }> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Not authenticated" };
@@ -54,12 +55,12 @@ export async function markSummaryRead(
     });
 
     // 3. Update profile totals + streak + level.
-    await refreshProfile(supabase, user.id);
+    await refreshProfile(supabase, user.id, clientDate);
     // 4. Evaluate badges.
     await evaluateAndAwardBadges(supabase, user.id);
   } else {
     // Even if already read, keep the streak alive for today's activity.
-    await refreshProfile(supabase, user.id);
+    await refreshProfile(supabase, user.id, clientDate);
   }
 
   return { ok: true, xpAwarded: wasRead ? 0 : XP_REWARDS.readSummary };
@@ -69,33 +70,28 @@ export async function markSummaryRead(
 export async function refreshProfile(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
+  clientDate?: string,
 ) {
-  // Total XP from the ledger.
-  const { data: xpRows } = await supabase
-    .from("user_xp_log")
-    .select("amount")
-    .eq("user_id", userId);
-  const totalXp = (xpRows ?? []).reduce((s, r) => s + r.amount, 0);
-
-  const { level } = computeLevel(totalXp);
-
-  // Current profile (for streak state).
+  // Current profile (for total_xp and streak state).
   const { data: profile } = await supabase
     .from("profiles")
-    .select("current_streak, longest_streak, last_active_date")
+    .select("total_xp, current_streak, longest_streak, last_active_date")
     .eq("id", userId)
     .maybeSingle();
+
+  const totalXp = profile?.total_xp ?? 0;
+  const { level } = computeLevel(totalXp);
 
   const streak = updateStreak({
     currentStreak: profile?.current_streak ?? 0,
     longestStreak: profile?.longest_streak ?? 0,
     lastActiveDate: profile?.last_active_date ?? null,
+    clientDate,
   });
 
   await supabase
     .from("profiles")
     .update({
-      total_xp: totalXp,
       current_level: level,
       current_streak: streak.currentStreak,
       longest_streak: streak.longestStreak,
@@ -110,7 +106,7 @@ export async function evaluateAndAwardBadges(
   userId: string,
 ): Promise<string[]> {
   // Gather the context needed to evaluate badges.
-  const [progress, profile, xpRes, attemptsRes] = await Promise.all([
+  const [progress, profileRes, attemptsRes] = await Promise.all([
     supabase
       .from("user_chapter_progress")
       .select("summary_read, quiz_completed, chapter_completed, best_score")
@@ -120,7 +116,6 @@ export async function evaluateAndAwardBadges(
       .select("total_xp, current_level, current_streak")
       .eq("id", userId)
       .maybeSingle(),
-    supabase.from("user_xp_log").select("amount").eq("user_id", userId),
     supabase
       .from("user_quiz_attempts")
       .select("score, total")
@@ -130,7 +125,9 @@ export async function evaluateAndAwardBadges(
   const rows = progress.data ?? [];
   const summariesRead = rows.filter((r) => r.summary_read).length;
   const chaptersCompleted = rows.filter((r) => r.chapter_completed).length;
-  const totalXp = (xpRes.data ?? []).reduce((s, r) => s + r.amount, 0);
+  
+  const profile = profileRes.data;
+  const totalXp = profile?.total_xp ?? 0;
   const { level } = computeLevel(totalXp);
 
   const attempts = attemptsRes.data ?? [];
@@ -140,12 +137,12 @@ export async function evaluateAndAwardBadges(
 
   const earned = evaluateBadges({
     totalXp,
-    currentLevel: profile.data?.current_level ?? level,
+    currentLevel: profile?.current_level ?? level,
     chaptersCompleted,
     summariesRead,
     perfectQuizzes,
     totalCorrectAnswers,
-    currentStreak: profile.data?.current_streak ?? 0,
+    currentStreak: profile?.current_streak ?? 0,
   });
 
   // Find which are newly earned.

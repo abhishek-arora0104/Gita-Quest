@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/Badge";
 import { completeQuiz, type QuizResult } from "@/actions/completeQuiz";
 import { QuizResults } from "./QuizResults";
 import { cn } from "@/lib/utils/cn";
+import type { Dictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/config";
 
 type QuestionForClient = {
   id: string;
@@ -34,17 +36,20 @@ export function QuizEngine({
   questions,
   answerKey,
   authenticated,
+  t,
+  locale,
 }: {
   chapterNumber: number;
   chapterSlug: string;
   questions: QuestionForClient[];
   answerKey: AnswerKeyEntry[];
   authenticated: boolean;
+  t: Dictionary;
+  locale: Locale;
 }) {
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
-  // answers[i] = option chosen for question i (null until answered)
   const [answers, setAnswers] = useState<(number | null)[]>(
     () => questions.map(() => null),
   );
@@ -78,7 +83,6 @@ export function QuizEngine({
       setSelected(null);
       setRevealed(false);
     } else {
-      // Last question → submit.
       void submit();
     }
   }
@@ -88,7 +92,8 @@ export function QuizEngine({
     setSubmitError(null);
     startTransition(async () => {
       if (authenticated) {
-        const res = await completeQuiz(chapterNumber, answers);
+        const clientDate = new Date().toISOString().slice(0, 10);
+        const res = await completeQuiz(chapterNumber, answers, locale, clientDate);
         if (!res.ok) {
           setSubmitError(res.error ?? "Something went wrong.");
           setSubmitting(false);
@@ -97,7 +102,6 @@ export function QuizEngine({
         setResult(res);
         setSubmitting(false);
       } else {
-        // Guest: score locally only.
         const correct = questions.reduce(
           (s, _q, i) =>
             s + (answers[i] === answerKey[i].correctIndex ? 1 : 0),
@@ -127,6 +131,8 @@ export function QuizEngine({
         chapterNumber={chapterNumber}
         chapterSlug={chapterSlug}
         authenticated={authenticated}
+        t={t}
+        locale={locale}
       />
     );
   }
@@ -138,7 +144,7 @@ export function QuizEngine({
       <div className="mb-6">
         <div className="mb-2 flex items-center justify-between text-sm">
           <span className="font-medium text-ink-soft">
-            Question {current + 1} of {questions.length}
+            {t.quiz.question} {current + 1} {t.quiz.of} {questions.length}
           </span>
           <Badge variant={difficultyTone[q.difficulty]}>
             {q.difficulty}
@@ -147,9 +153,9 @@ export function QuizEngine({
         <ProgressBar
           value={current + (revealed ? 1 : 0)}
           max={questions.length}
-          label="Quiz progress"
+          label={t.quiz.progress}
         />
-        <LiveScore answers={answers} answerKey={answerKey} />
+        <LiveScore answers={answers} answerKey={answerKey} t={t} />
       </div>
 
       {/* Question card */}
@@ -206,12 +212,12 @@ export function QuizEngine({
                 <span className="text-ink">{opt}</span>
                 {revealed && isAnswer && (
                   <span className="ml-auto text-sm font-semibold text-leaf">
-                    ✓ Correct
+                    {t.quiz.correctBadge}
                   </span>
                 )}
                 {revealed && isThis && !isAnswer && (
                   <span className="ml-auto text-sm font-semibold text-red-600">
-                    ✗ Your answer
+                    {t.quiz.yourAnswer}
                   </span>
                 )}
               </button>
@@ -230,7 +236,7 @@ export function QuizEngine({
             )}
           >
             <p className="font-semibold text-maroon">
-              {isCorrect ? "✓ Correct!" : "Not quite."}
+              {isCorrect ? t.quiz.correct : t.common.notQuite}
             </p>
             <p className="mt-1 text-ink-soft">{key.explanation}</p>
           </div>
@@ -240,13 +246,13 @@ export function QuizEngine({
       {/* Footer actions */}
       <div className="mt-6 flex items-center justify-between gap-3">
         <div className="text-sm text-ink-muted">
-          {!revealed && selected === null && "Select an answer to continue."}
-          {!revealed && selected !== null && "Check your answer →"}
+          {!revealed && selected === null && t.quiz.select}
+          {!revealed && selected !== null && t.quiz.check}
         </div>
         <div className="flex gap-3">
           {!revealed ? (
             <Button onClick={handleCheck} disabled={selected === null}>
-              Check answer
+              {t.quiz.checkAnswer}
             </Button>
           ) : (
             <Button
@@ -255,10 +261,10 @@ export function QuizEngine({
               variant={current === questions.length - 1 ? "secondary" : "primary"}
             >
               {submitting
-                ? "Calculating score…"
+                ? t.quiz.calculating
                 : current === questions.length - 1
-                  ? "See results →"
-                  : "Next question →"}
+                  ? t.quiz.seeResults
+                  : t.quiz.nextQuestion}
             </Button>
           )}
         </div>
@@ -269,8 +275,8 @@ export function QuizEngine({
       )}
 
       <p className="mt-8 text-center text-xs text-ink-muted">
-        <Link href={`/chapters/${chapterSlug}`} className="hover:text-saffron">
-          Exit quiz
+        <Link href={`/${locale}/chapters/${chapterSlug}`} className="hover:text-saffron">
+          {t.quiz.exit}
         </Link>
       </p>
     </div>
@@ -281,9 +287,11 @@ export function QuizEngine({
 function LiveScore({
   answers,
   answerKey,
+  t,
 }: {
   answers: (number | null)[];
   answerKey: AnswerKeyEntry[];
+  t: Dictionary;
 }) {
   const correct = answers.reduce<number>(
     (s, a, i) => s + ((a ?? null) === answerKey[i].correctIndex ? 1 : 0),
@@ -293,7 +301,7 @@ function LiveScore({
   if (answered === 0) return null;
   return (
     <p className="mt-2 text-xs font-medium text-ink-muted">
-      Score so far: {correct}/{answered} correct
+      {t.quiz.scoreSoFar}: {correct}/{answered} {t.dashboard.correct}
     </p>
   );
 }

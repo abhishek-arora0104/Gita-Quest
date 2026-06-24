@@ -10,30 +10,42 @@ import { DailyLoginButton } from "@/components/gamification/DailyLoginButton";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { getRequestLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionary";
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Track your Gita Quest progress, XP, level, badges, and streak.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Dashboard",
+    description: "Track your Gita Quest progress, XP, level, badges, and streak.",
+  };
+}
 
 export default async function DashboardPage() {
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
   const user = await getCurrentUser();
 
   if (!user) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
         <h1 className="font-serif text-3xl font-bold text-maroon">
-          Please log in
+          {t.dashboard.loginTitle}
         </h1>
         <p className="mt-2 text-ink-soft">
-          You need an account to see your progress.
+          {t.dashboard.loginBody}
         </p>
         <div className="mt-6 flex justify-center gap-3">
-          <Link href="/auth/login" className="rounded-full bg-saffron px-5 py-2.5 text-sm font-semibold text-white">
-            Log in
+          <Link
+            href={`/${locale}/auth/login`}
+            className="rounded-full bg-saffron px-5 py-2.5 text-sm font-semibold text-white"
+          >
+            {t.dashboard.logIn}
           </Link>
-          <Link href="/auth/signup" className="rounded-full border-2 border-saffron px-5 py-2.5 text-sm font-semibold text-saffron">
-            Sign up
+          <Link
+            href={`/${locale}/auth/signup`}
+            className="rounded-full border-2 border-saffron px-5 py-2.5 text-sm font-semibold text-saffron"
+          >
+            {t.dashboard.signUp}
           </Link>
         </div>
       </div>
@@ -84,7 +96,7 @@ export default async function DashboardPage() {
   const chaptersCompleted = progress.filter((p) => p.chapter_completed).length;
 
   // Chapter library for linking.
-  const library = getLibraryList();
+  const library = getLibraryList(locale);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
@@ -92,17 +104,20 @@ export default async function DashboardPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-bold text-maroon">
-            Welcome,{" "}
+            {t.dashboard.welcome},{" "}
             <span className="text-saffron">
-              {(user.email ?? "friend").split("@")[0]}
+              {(user.email ?? t.dashboard.friend).split("@")[0]}
             </span>
           </h1>
           <p className="mt-1 text-ink-soft">
-            Your Gita Quest journey at a glance.
+            {t.dashboard.glance}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <DailyLoginButton />
+          <DailyLoginButton 
+            t={t} 
+            alreadyClaimed={profile?.daily_login_claimed === new Date().toISOString().slice(0, 10)} 
+          />
           <LogoutButton />
         </div>
       </div>
@@ -111,7 +126,7 @@ export default async function DashboardPage() {
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Card>
           <div className="p-5 text-center">
-            <p className="text-sm text-ink-muted">Chapters completed</p>
+            <p className="text-sm text-ink-muted">{t.dashboard.chaptersCompleted}</p>
             <p className="mt-1 font-serif text-3xl font-bold text-maroon">
               {chaptersCompleted}
               <span className="text-lg text-ink-muted">/{library.filter((c) => c.available).length}</span>
@@ -120,19 +135,19 @@ export default async function DashboardPage() {
         </Card>
         <Card>
           <div className="p-5 text-center">
-            <p className="text-sm text-ink-muted">Quiz accuracy</p>
+            <p className="text-sm text-ink-muted">{t.dashboard.quizAccuracy}</p>
             <p className="mt-1 font-serif text-3xl font-bold text-maroon">
               {avgAccuracy}
               <span className="text-lg text-ink-muted">%</span>
             </p>
             <p className="mt-1 text-xs text-ink-muted">
-              {totalCorrect}/{totalQuestions} correct
+              {totalCorrect}/{totalQuestions} {t.dashboard.correct}
             </p>
           </div>
         </Card>
         <Card>
           <div className="p-5 flex items-center justify-center">
-            <StreakCounter current={currentStreak} longest={longestStreak} />
+            <StreakCounter current={currentStreak} longest={longestStreak} t={t} />
           </div>
         </Card>
       </div>
@@ -140,17 +155,17 @@ export default async function DashboardPage() {
       {/* XP & Level */}
       <Card className="mt-6">
         <div className="p-5 sm:p-6">
-          <XPBar totalXp={totalXp} />
+          <XPBar totalXp={totalXp} t={t} />
         </div>
       </Card>
 
       {/* Chapter progress list */}
       <section className="mt-8">
         <h2 className="font-serif text-2xl font-semibold text-maroon">
-          Chapter Progress
+          {t.dashboard.chapterProgress}
         </h2>
         <p className="mt-1 text-sm text-ink-soft">
-          Track which chapters you&apos;ve read and quizzed.
+          {t.dashboard.progressBody}
         </p>
         <div className="mt-4 space-y-3">
           {library
@@ -165,7 +180,7 @@ export default async function DashboardPage() {
               return (
                 <Link
                   key={ch.number}
-                  href={`/chapters/${ch.slug}`}
+                  href={`/${locale}/chapters/${ch.slug}`}
                   className="block"
                 >
                   <Card className="transition-transform hover:-translate-y-0.5 hover:shadow-sm">
@@ -188,12 +203,12 @@ export default async function DashboardPage() {
                         </p>
                         <div className="mt-1 flex flex-wrap items-center gap-2">
                           <Badge variant={read ? "leaf" : "muted"}>
-                            {read ? "✓ Read" : "○ Not read"}
+                            {read ? `${t.dashboard.readDone}` : `○ ${t.dashboard.notRead}`}
                           </Badge>
                           <Badge variant={quizzed ? "saffron" : "muted"}>
                             {quizzed
-                              ? `✓ Quiz ${best}/25`
-                              : "○ Quiz pending"}
+                              ? `${t.dashboard.quizDone} ${best}/${ch.quizQuestionCount}`
+                              : `○ ${t.dashboard.quizPending}`}
                           </Badge>
                         </div>
                       </div>
@@ -211,13 +226,13 @@ export default async function DashboardPage() {
       {/* Badges */}
       <section className="mt-10">
         <h2 className="font-serif text-2xl font-semibold text-maroon">
-          Badges
+          {t.dashboard.badges}
         </h2>
         <p className="mt-1 text-sm text-ink-soft">
-          {earnedBadgeIds.size} of 10 earned
+          {earnedBadgeIds.size} {t.dashboard.earnedOf}
         </p>
         <div className="mt-4">
-          <BadgeGrid earnedIds={earnedBadgeIds} />
+          <BadgeGrid earnedIds={earnedBadgeIds} t={t} />
         </div>
       </section>
     </div>

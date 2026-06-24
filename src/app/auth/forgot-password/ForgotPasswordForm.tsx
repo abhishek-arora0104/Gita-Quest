@@ -5,8 +5,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { getDictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/config";
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ locale = "en" }: { locale?: Locale }) {
+  const t = getDictionary(locale);
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -35,16 +38,15 @@ export function ForgotPasswordForm() {
   if (sent) {
     return (
       <div className="rounded-2xl border border-leaf/30 bg-leaf/5 p-6 text-center">
-        <p className="text-lg font-semibold text-leaf">Check your email</p>
+        <p className="text-lg font-semibold text-leaf">{t.auth.sentTitle}</p>
         <p className="mt-2 text-sm text-ink-soft">
-          We&apos;ve sent a password reset link to <strong>{email}</strong>. It may
-          take a minute to arrive.
+          {t.auth.sentBody} <strong>{email}</strong>
         </p>
         <Link
-          href="/auth/login"
+          href={`/${locale}/auth/login`}
           className="mt-4 inline-block text-sm font-medium text-saffron hover:underline"
         >
-          ← Back to login
+          {t.auth.backToLogin}
         </Link>
       </div>
     );
@@ -53,7 +55,7 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        label="Email"
+        label={t.auth.email}
         name="email"
         type="email"
         autoComplete="email"
@@ -70,16 +72,16 @@ export function ForgotPasswordForm() {
       )}
 
       <Button type="submit" size="lg" className="w-full" disabled={loading}>
-        {loading ? "Sending…" : "Send reset link"}
+        {loading ? t.auth.sending : t.auth.sendReset}
       </Button>
 
       <p className="text-center text-sm text-ink-soft">
-        Remember your password?{" "}
+        {t.auth.rememberPassword}{" "}
         <Link
-          href="/auth/login"
+          href={`/${locale}/auth/login`}
           className="font-medium text-saffron hover:underline"
         >
-          Log in
+          {t.nav.login}
         </Link>
       </p>
     </form>

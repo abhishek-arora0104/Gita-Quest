@@ -11,6 +11,7 @@ import { refreshProfile } from "./markSummaryRead";
 export async function saveReflection(
   chapterNumber: number,
   text: string,
+  clientDate?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Not authenticated" };
@@ -31,7 +32,7 @@ export async function saveReflection(
   if (error) return { ok: false, error: error.message };
 
   // Keep the streak alive for today.
-  await refreshProfile(supabase, user.id);
+  await refreshProfile(supabase, user.id, clientDate);
 
   return { ok: true };
 }

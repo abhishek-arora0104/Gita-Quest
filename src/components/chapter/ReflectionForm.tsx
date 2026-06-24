@@ -4,13 +4,16 @@ import { useState, useTransition } from "react";
 import { Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { saveReflection } from "@/actions/saveReflection";
+import type { Dictionary } from "@/lib/i18n/dictionary";
 
 export function ReflectionForm({
   chapterNumber,
   initialText,
+  t,
 }: {
   chapterNumber: number;
   initialText: string | null;
+  t: Dictionary;
 }) {
   const [text, setText] = useState(initialText ?? "");
   const [saved, setSaved] = useState(false);
@@ -18,7 +21,8 @@ export function ReflectionForm({
 
   function handleSave() {
     startTransition(async () => {
-      await saveReflection(chapterNumber, text);
+      const clientDate = new Date().toISOString().slice(0, 10);
+      await saveReflection(chapterNumber, text, clientDate);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     });
@@ -27,12 +31,12 @@ export function ReflectionForm({
   return (
     <div className="mt-4">
       <Textarea
-        label="Your reflection (optional)"
+        label={t.reflection.label}
         name="reflection"
         rows={3}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="What lesson stood out to you? How will you apply it?"
+        placeholder={t.reflection.placeholder}
       />
       <div className="mt-3 flex items-center gap-3">
         <Button
@@ -42,11 +46,9 @@ export function ReflectionForm({
           onClick={handleSave}
           disabled={pending}
         >
-          {pending ? "Saving…" : "Save reflection"}
+          {pending ? t.reflection.saving : t.reflection.save}
         </Button>
-        {saved && (
-          <span className="text-sm text-leaf">✓ Saved</span>
-        )}
+        {saved && <span className="text-sm text-leaf">{t.reflection.saved}</span>}
       </div>
     </div>
   );

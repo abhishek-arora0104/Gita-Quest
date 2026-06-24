@@ -13,13 +13,15 @@ export async function getCurrentUser(): Promise<User | null> {
   return user;
 }
 
+import { redirect } from "next/navigation";
+
 /**
  * Returns the current user, redirecting to /auth/login if not authenticated.
  */
 export async function requireUser(): Promise<User> {
   const user = await getCurrentUser();
   if (!user) {
-    throw new Error("UNAUTHENTICATED");
+    redirect("/auth/login");
   }
   return user;
 }

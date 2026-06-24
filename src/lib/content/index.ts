@@ -3,6 +3,7 @@ import type {
   ChapterSummaryMeta,
   ComingSoonChapter,
 } from "./schema";
+export type { ChapterSummaryMeta } from "./schema";
 import { chapter1 } from "./chapters/chapter-01";
 import { chapter2 } from "./chapters/chapter-02";
 import { chapter6 } from "./chapters/chapter-06";
@@ -23,12 +24,14 @@ import {
   chapter17,
   chapter18,
 } from "./chapters/remaining";
+import type { Locale } from "@/lib/i18n/config";
+import { hiChaptersByNumber } from "./hi/chapters";
 
 /**
  * Fully written chapters, keyed by number.
  * To add a chapter: create `chapters/chapter-NN.ts`, import it, add to this map.
  */
-export const chaptersByNumber: Record<number, Chapter> = {
+export const enChaptersByNumber: Record<number, Chapter> = {
   1: chapter1,
   2: chapter2,
   3: chapter3,
@@ -49,6 +52,13 @@ export const chaptersByNumber: Record<number, Chapter> = {
   18: chapter18,
 };
 
+export const chaptersByNumber = enChaptersByNumber;
+
+export const chaptersByLocale: Record<Locale, Record<number, Chapter>> = {
+  en: enChaptersByNumber,
+  hi: hiChaptersByNumber,
+};
+
 /** Chapters that exist in the product but aren't written yet. */
 export const comingSoonChapters: ComingSoonChapter[] = [];
 
@@ -57,9 +67,22 @@ export const allChapters: Chapter[] = Object.values(chaptersByNumber).sort(
   (a, b) => a.number - b.number,
 );
 
+export function getAllChapters(locale: Locale = "en"): Chapter[] {
+  return Object.values(chaptersByLocale[locale]).sort(
+    (a, b) => a.number - b.number,
+  );
+}
+
 /** A chapter by slug (used in dynamic routes). */
 export function getChapterBySlug(slug: string): Chapter | undefined {
   return allChapters.find((c) => c.slug === slug);
+}
+
+export function getChapterBySlugForLocale(
+  slug: string,
+  locale: Locale,
+): Chapter | undefined {
+  return getAllChapters(locale).find((c) => c.slug === slug);
 }
 
 /** A chapter by number. */
@@ -67,19 +90,27 @@ export function getChapterByNumber(n: number): Chapter | undefined {
   return chaptersByNumber[n];
 }
 
+export function getChapterByNumberForLocale(
+  n: number,
+  locale: Locale,
+): Chapter | undefined {
+  return chaptersByLocale[locale][n];
+}
+
 /**
  * The complete library list (18 entries), combining written chapters
  * with coming-soon placeholders, sorted by chapter number.
  * Used on the chapters library page.
  */
-export function getLibraryList(): ChapterSummaryMeta[] {
-  const written: ChapterSummaryMeta[] = allChapters.map((c) => ({
+export function getLibraryList(locale: Locale = "en"): ChapterSummaryMeta[] {
+  const written: ChapterSummaryMeta[] = getAllChapters(locale).map((c) => ({
     number: c.number,
     slug: c.slug,
     title: c.title,
     sanskritName: c.sanskritName,
     subtitle: c.subtitle,
     readingTimeMins: c.readingTimeMins,
+    quizQuestionCount: c.quiz?.length ?? 25,
     available: true,
   }));
 
@@ -90,6 +121,7 @@ export function getLibraryList(): ChapterSummaryMeta[] {
     sanskritName: c.sanskritName,
     subtitle: c.theme,
     readingTimeMins: 0,
+    quizQuestionCount: 0,
     available: false,
   }));
 
@@ -102,6 +134,15 @@ export const writtenChapterSlugs: string[] = allChapters.map((c) => c.slug);
 /** The next written chapter after a given number, if any. */
 export function getNextChapter(n: number): Chapter | undefined {
   return allChapters
+    .filter((c) => c.number > n)
+    .sort((a, b) => a.number - b.number)[0];
+}
+
+export function getNextChapterForLocale(
+  n: number,
+  locale: Locale,
+): Chapter | undefined {
+  return getAllChapters(locale)
     .filter((c) => c.number > n)
     .sort((a, b) => a.number - b.number)[0];
 }

@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getDictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/config";
 
 export function OAuthButtons({
   redirectTo = "/dashboard",
+  locale = "en",
 }: {
   redirectTo?: string;
+  locale?: Locale;
 }) {
+  const t = getDictionary(locale);
   const [loading, setLoading] = useState(false);
 
   async function handleGoogleLogin() {
@@ -51,13 +56,13 @@ export function OAuthButtons({
             fill="#EA4335"
           />
         </svg>
-        {loading ? "Redirecting…" : "Continue with Google"}
+        {loading ? t.auth.redirecting : t.auth.google}
       </button>
 
       <div className="my-6 flex items-center gap-3">
         <div className="h-px flex-1 bg-gold/30" />
         <span className="text-xs font-medium uppercase tracking-wider text-ink-muted">
-          or continue with email
+          {t.auth.orEmail}
         </span>
         <div className="h-px flex-1 bg-gold/30" />
       </div>

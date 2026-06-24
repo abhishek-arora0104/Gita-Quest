@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Cormorant_Garamond, Noto_Serif_Devanagari } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SiteShell } from "@/components/layout/SiteShell";
+import { getRequestLocale } from "@/lib/i18n/server";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -13,6 +14,13 @@ const inter = Inter({
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const notoSerifDevanagari = Noto_Serif_Devanagari({
+  variable: "--font-noto-serif-devanagari",
+  subsets: ["devanagari"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
@@ -52,18 +60,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getRequestLocale();
   return (
     <html
-      lang="en"
-      className={`${inter.variable} ${cormorant.variable} h-full antialiased`}
+      lang={locale}
+      className={`${inter.variable} ${cormorant.variable} ${notoSerifDevanagari.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-cream text-ink">
-        <SiteShell>{children}</SiteShell>
+        <SiteShell locale={locale}>{children}</SiteShell>
         <Analytics />
       </body>
     </html>

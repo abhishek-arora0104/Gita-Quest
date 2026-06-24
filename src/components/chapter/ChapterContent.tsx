@@ -1,17 +1,24 @@
 import type { Chapter } from "@/lib/content/schema";
 import { Card } from "@/components/ui/Card";
 import { PracticalExampleList } from "./PracticalExampleList";
+import type { Dictionary } from "@/lib/i18n/dictionary";
 
 /**
  * Renders the full chapter summary body (intro through reflection prompts).
  * This is server-rendered for SEO and readability.
  */
-export function ChapterContent({ chapter }: { chapter: Chapter }) {
+export function ChapterContent({
+  chapter,
+  t,
+}: {
+  chapter: Chapter;
+  t: Dictionary;
+}) {
   return (
     <article className="space-y-12">
       {/* Introduction */}
       <section aria-labelledby="intro">
-        <SectionTitle>Introduction</SectionTitle>
+        <SectionTitle>{t.chapter.introduction}</SectionTitle>
         <div className="prose-gita mt-4">
           {chapter.intro.split("\n\n").map((p, i) => (
             <p key={i}>{p}</p>
@@ -21,7 +28,7 @@ export function ChapterContent({ chapter }: { chapter: Chapter }) {
 
       {/* Story overview */}
       <section aria-labelledby="story">
-        <SectionTitle>Story Overview</SectionTitle>
+        <SectionTitle>{t.chapter.storyOverview}</SectionTitle>
         <div className="prose-gita mt-4">
           {chapter.storyOverview.split("\n\n").map((p, i) => (
             <p key={i}>{p}</p>
@@ -31,7 +38,7 @@ export function ChapterContent({ chapter }: { chapter: Chapter }) {
 
       {/* Main teachings */}
       <section aria-labelledby="teachings">
-        <SectionTitle>Main Teachings</SectionTitle>
+        <SectionTitle>{t.chapter.mainTeachings}</SectionTitle>
         <div className="mt-4 space-y-4">
           {chapter.mainTeachings.map((t, i) => (
             <Card key={i}>
@@ -53,9 +60,9 @@ export function ChapterContent({ chapter }: { chapter: Chapter }) {
 
       {/* Practical examples */}
       <section aria-labelledby="examples">
-        <SectionTitle>Practical Examples</SectionTitle>
+        <SectionTitle>{t.chapter.practicalExamples}</SectionTitle>
         <p className="mt-2 text-ink-soft">
-          How this chapter applies to real life today:
+          {t.chapter.examplesIntro}
         </p>
         <div className="mt-4">
           <PracticalExampleList examples={chapter.practicalExamples} />
@@ -64,7 +71,7 @@ export function ChapterContent({ chapter }: { chapter: Chapter }) {
 
       {/* Lessons for daily life */}
       <section aria-labelledby="daily">
-        <SectionTitle>Lessons for Daily Life</SectionTitle>
+        <SectionTitle>{t.chapter.dailyLife}</SectionTitle>
         <ul className="mt-4 space-y-3">
           {chapter.lessonsForDailyLife.map((l, i) => (
             <li key={i} className="flex items-start gap-3">
@@ -82,7 +89,7 @@ export function ChapterContent({ chapter }: { chapter: Chapter }) {
 
       {/* Key takeaways */}
       <section aria-labelledby="takeaways">
-        <SectionTitle>Key Takeaways</SectionTitle>
+        <SectionTitle>{t.chapter.takeaways}</SectionTitle>
         <Card>
           <div className="p-5 sm:p-6">
             <ul className="space-y-3">
@@ -104,9 +111,9 @@ export function ChapterContent({ chapter }: { chapter: Chapter }) {
 
       {/* Reflection questions */}
       <section aria-labelledby="reflection">
-        <SectionTitle>Reflection Questions</SectionTitle>
+        <SectionTitle>{t.chapter.reflection}</SectionTitle>
         <p className="mt-2 text-ink-soft">
-          Pause and think about how this chapter applies to your own life.
+          {t.chapter.reflectionIntro}
         </p>
         <ol className="mt-4 space-y-3">
           {chapter.reflectionQuestions.map((q, i) => (

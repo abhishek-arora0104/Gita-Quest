@@ -32,8 +32,9 @@ export function updateStreak(input: {
   currentStreak: number;
   longestStreak: number;
   lastActiveDate: string | null;
+  clientDate?: string;
 }): StreakUpdate {
-  const today = todayISO();
+  const today = input.clientDate || todayISO();
 
   if (!input.lastActiveDate) {
     return {

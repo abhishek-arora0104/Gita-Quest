@@ -1,7 +1,14 @@
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { levelProgress } from "@/lib/gamification/xp";
+import type { Dictionary } from "@/lib/i18n/dictionary";
 
-export function XPBar({ totalXp }: { totalXp: number }) {
+export function XPBar({
+  totalXp,
+  t,
+}: {
+  totalXp: number;
+  t: Dictionary;
+}) {
   const lp = levelProgress(totalXp);
 
   return (
@@ -9,7 +16,7 @@ export function XPBar({ totalXp }: { totalXp: number }) {
       <div className="flex items-end justify-between text-sm">
         <div>
           <span className="font-serif text-lg font-bold text-maroon">
-            Level {lp.level}
+            {t.dashboard.level} {lp.level}
           </span>
           <span className="ml-2 text-ink-soft">{lp.name}</span>
         </div>
@@ -23,8 +30,8 @@ export function XPBar({ totalXp }: { totalXp: number }) {
         tone="saffron"
         label={
           lp.xpForNext
-            ? `${lp.xpIntoLevel} / ${lp.xpForNext} XP to next level`
-            : "Max level reached!"
+            ? `${lp.xpIntoLevel} / ${lp.xpForNext} ${t.dashboard.xpToNext}`
+            : t.dashboard.maxLevel
         }
         className="mt-2"
       />

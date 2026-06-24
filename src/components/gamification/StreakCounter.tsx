@@ -1,9 +1,13 @@
+import type { Dictionary } from "@/lib/i18n/dictionary";
+
 export function StreakCounter({
   current,
   longest,
+  t,
 }: {
   current: number;
   longest: number;
+  t: Dictionary;
 }) {
   return (
     <div className="flex items-center gap-4">
@@ -14,7 +18,7 @@ export function StreakCounter({
         <p className="mt-1 font-serif text-2xl font-bold text-maroon">
           {current}
         </p>
-        <p className="text-xs text-ink-muted">current streak</p>
+        <p className="text-xs text-ink-muted">{t.dashboard.currentStreak}</p>
       </div>
       {longest > current && (
         <div className="text-center">
@@ -24,7 +28,7 @@ export function StreakCounter({
           <p className="mt-1 font-serif text-2xl font-bold text-gold-dark">
             {longest}
           </p>
-          <p className="text-xs text-ink-muted">longest streak</p>
+          <p className="text-xs text-ink-muted">{t.dashboard.longestStreak}</p>
         </div>
       )}
     </div>

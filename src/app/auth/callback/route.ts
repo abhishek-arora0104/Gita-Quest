@@ -10,7 +10,12 @@ import { createServerClient } from "@supabase/ssr";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  let next = searchParams.get("next") ?? "/dashboard";
+  
+  const locale = request.cookies.get("gita-locale")?.value || "en";
+  if (!next.startsWith(`/${locale}`)) {
+    next = `/${locale}${next.startsWith("/") ? next : `/${next}`}`;
+  }
 
   if (code) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -39,5 +44,5 @@ export async function GET(request: NextRequest) {
   }
 
   // If code is missing or exchange failed, redirect to login with an error hint.
-  return NextResponse.redirect(`${origin}/auth/login?error=auth_callback_failed`);
+  return NextResponse.redirect(`${origin}/${locale}/auth/login?error=auth_callback_failed`);
 }

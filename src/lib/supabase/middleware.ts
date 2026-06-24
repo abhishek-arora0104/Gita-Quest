@@ -1,5 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  getLocaleFromPath,
+  stripLocaleFromPath,
+  withLocale,
+} from "@/lib/i18n/config";
 
 /** Routes that require authentication — unauthenticated users are bounced to login. */
 const PROTECTED_ROUTES = ["/dashboard"];
@@ -45,20 +50,23 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
+  const pathname = stripLocaleFromPath(request.nextUrl.pathname);
+  const locale =
+    getLocaleFromPath(request.nextUrl.pathname) ??
+    getLocaleFromPath(`/${request.headers.get("x-gita-locale") ?? ""}`);
 
   // ── Protected routes: bounce unauthenticated users to login ──
   if (!user && PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/auth/login";
-    loginUrl.searchParams.set("redirectTo", pathname);
+    loginUrl.pathname = locale ? withLocale("/auth/login", locale) : "/auth/login";
+    loginUrl.searchParams.set("redirectTo", locale ? withLocale(pathname, locale) : pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // ── Auth routes: bounce authenticated users to dashboard ──
   if (user && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
     const dashUrl = request.nextUrl.clone();
-    dashUrl.pathname = "/dashboard";
+    dashUrl.pathname = locale ? withLocale("/dashboard", locale) : "/dashboard";
     return NextResponse.redirect(dashUrl);
   }
 

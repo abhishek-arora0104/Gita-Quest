@@ -1,17 +1,44 @@
 import type { Metadata } from "next";
 import { Card } from "@/components/ui/Card";
+import { getRequestLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionary";
 
-export const metadata: Metadata = {
-  title: "About",
-  description:
-    "Gita Quest makes the Bhagavad Gita easy to understand through simplified summaries, practical examples, and engaging quizzes.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const t = getDictionary(locale);
 
-export default function AboutPage() {
+  const langs: Record<string, string> = {
+    en: `${siteUrl}/en/about`,
+    hi: `${siteUrl}/hi/about`,
+    "x-default": `${siteUrl}/en/about`,
+  };
+
+  return {
+    title: t.about.title,
+    description: t.about.intro1,
+    alternates: {
+      canonical: `/${locale}/about`,
+      languages: langs,
+    },
+  };
+}
+
+export default async function AboutPage() {
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
+
+  const cards = [
+    { title: t.about.card1Title, body: t.about.card1Body },
+    { title: t.about.card2Title, body: t.about.card2Body },
+    { title: t.about.card3Title, body: t.about.card3Body },
+    { title: t.about.card4Title, body: t.about.card4Body },
+  ];
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
       <h1 className="text-center font-serif text-4xl font-bold text-maroon">
-        About Gita Quest
+        {t.about.title}
       </h1>
       <div className="divider-ornament mt-6" aria-hidden="true">
         <span>❖</span>
@@ -19,70 +46,64 @@ export default function AboutPage() {
 
       <div className="prose-gita mt-8">
         <p>
-          <strong>Gita Quest</strong> is a beginner-friendly platform that helps
-          you understand, remember, and apply the teachings of the Bhagavad
-          Gita.
+          <strong>Gita Quest</strong> {t.about.intro1}
         </p>
-        <p>
-          Many people want to learn the Gita but find traditional translations
-          difficult. Sanskrit terminology can feel overwhelming, and most
-          websites are built for reading — not learning. Younger learners often
-          forget what they read, and there&apos;s little to keep them engaged
-          after a chapter ends.
-        </p>
-        <p>
-          Gita Quest solves this by turning each of the 18 chapters into a
-          simple, friendly lesson — followed by a quiz, points, badges, and a
-          daily streak that builds a real habit.
-        </p>
+        <p>{t.about.intro2}</p>
+        <p>{t.about.intro3}</p>
       </div>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        <Card>
-          <div className="p-5">
-            <h2 className="font-serif text-xl font-semibold text-maroon">
-              Simple language
-            </h2>
-            <p className="mt-2 text-sm text-ink-soft">
-              Every summary is rewritten in plain English. A 12-year-old should
-              comfortably understand it.
-            </p>
-          </div>
-        </Card>
-        <Card>
-          <div className="p-5">
-            <h2 className="font-serif text-xl font-semibold text-maroon">
-              Original content
-            </h2>
-            <p className="mt-2 text-sm text-ink-soft">
-              All summaries and quizzes are original, written from source
-              material — never copied.
-            </p>
-          </div>
-        </Card>
-        <Card>
-          <div className="p-5">
-            <h2 className="font-serif text-xl font-semibold text-maroon">
-              Practical focus
-            </h2>
-            <p className="mt-2 text-sm text-ink-soft">
-              Each chapter includes real-life examples for school, career,
-              relationships, and daily life.
-            </p>
-          </div>
-        </Card>
-        <Card>
-          <div className="p-5">
-            <h2 className="font-serif text-xl font-semibold text-maroon">
-              Learn by doing
-            </h2>
-            <p className="mt-2 text-sm text-ink-soft">
-              25 quiz questions per chapter with instant feedback help you
-              actually retain what you learn.
-            </p>
-          </div>
-        </Card>
+        {cards.map((card) => (
+          <Card key={card.title}>
+            <div className="p-5">
+              <h2 className="font-serif text-xl font-semibold text-maroon">
+                {card.title}
+              </h2>
+              <p className="mt-2 text-sm text-ink-soft">{card.body}</p>
+            </div>
+          </Card>
+        ))}
       </div>
+
+      {/* ── Spiritual dedication ── */}
+      <div className="divider-ornament mt-16" aria-hidden="true">
+        <span>❖</span>
+      </div>
+
+      <section className="mt-10 text-center" aria-label="Dedication">
+        <p
+          className="font-serif text-3xl leading-tight text-saffron-dark select-none"
+          aria-hidden="true"
+        >
+          ॐ
+        </p>
+
+        <p className="mt-6 text-sm tracking-wide text-ink-muted uppercase">
+          {t.about.developerLabel}
+        </p>
+        <p className="mt-1 font-serif text-xl font-semibold text-maroon">
+          {t.about.developerName}
+        </p>
+
+        <div className="mx-auto mt-8 h-px w-16 bg-saffron/40" aria-hidden="true" />
+
+        <p className="mt-8 text-sm tracking-wide text-ink-muted uppercase">
+          {t.about.dedicationLabel}
+        </p>
+        <p className="mt-2 font-serif text-xl font-semibold leading-snug text-maroon sm:text-2xl">
+          {t.about.dedicationName}
+        </p>
+        <p className="mx-auto mt-3 max-w-md text-sm italic text-saffron-dark">
+          — {t.about.dedicationVerse}
+        </p>
+
+        <p
+          className="mt-10 font-serif text-2xl text-ink-muted select-none"
+          aria-hidden="true"
+        >
+          हरे कृष्ण
+        </p>
+      </section>
     </div>
   );
 }

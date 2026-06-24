@@ -3,17 +3,20 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import type { User, Session } from "@supabase/supabase-js";
+import { getDictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/config";
 
-export function NavbarClient() {
+export function NavbarClient({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale);
   const [user, setUser] = useState<User | null>();
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }: { data: { user: User | null } }) => setUser(data.user));
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
       setUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
@@ -27,16 +30,16 @@ export function NavbarClient() {
     return (
       <div className="flex items-center gap-3">
         <Link
-          href="/auth/login"
+          href={`/${locale}/auth/login`}
           className="text-sm font-medium text-ink-soft transition-colors hover:text-saffron"
         >
-          Log in
+          {t.nav.login}
         </Link>
         <Link
-          href="/auth/signup"
+          href={`/${locale}/auth/signup`}
           className="rounded-full bg-saffron px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-saffron-dark"
         >
-          Start Learning
+          {t.nav.startLearning}
         </Link>
       </div>
     );
@@ -44,7 +47,7 @@ export function NavbarClient() {
 
   return (
     <Link
-      href="/dashboard"
+      href={`/${locale}/dashboard`}
       className="flex items-center gap-2 rounded-full bg-parchment px-3 py-1.5 text-sm font-medium text-maroon transition-colors hover:bg-gold-light/40"
     >
       <span
@@ -53,7 +56,7 @@ export function NavbarClient() {
       >
         {(user.email ?? "U").charAt(0).toUpperCase()}
       </span>
-      <span className="hidden sm:inline">Dashboard</span>
+      <span className="hidden sm:inline">{t.nav.dashboard}</span>
     </Link>
   );
 }

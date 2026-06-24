@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { getDictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/config";
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({ locale = "en" }: { locale?: Locale }) {
+  const t = getDictionary(locale);
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,12 +21,12 @@ export function ResetPasswordForm() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t.auth.passwordsNoMatch);
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setError(t.auth.passwordTooShort);
       return;
     }
 
@@ -38,14 +41,14 @@ export function ResetPasswordForm() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(`/${locale}/dashboard`);
     router.refresh();
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        label="New password"
+        label={t.auth.newPassword}
         name="password"
         type="password"
         autoComplete="new-password"
@@ -56,7 +59,7 @@ export function ResetPasswordForm() {
         required
       />
       <Input
-        label="Confirm password"
+        label={t.auth.confirmPassword}
         name="confirmPassword"
         type="password"
         autoComplete="new-password"
@@ -74,7 +77,7 @@ export function ResetPasswordForm() {
       )}
 
       <Button type="submit" size="lg" className="w-full" disabled={loading}>
-        {loading ? "Updating…" : "Update password"}
+        {loading ? t.auth.updating : t.auth.updatePassword}
       </Button>
     </form>
   );

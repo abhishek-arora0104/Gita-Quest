@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getRequestLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionary";
 
-export const metadata: Metadata = {
-  title: "Email confirmed",
-  description: "Your email has been verified.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
+  return {
+    title: t.auth.confirmTitle,
+    description: t.auth.confirmBody,
+    robots: { index: false },
+  };
+}
 
-export default function ConfirmPage() {
+export default async function ConfirmPage() {
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
+
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-4 py-20 sm:px-6 text-center">
       <div className="grid h-16 w-16 place-items-center rounded-full bg-leaf/10">
@@ -26,23 +36,23 @@ export default function ConfirmPage() {
         </svg>
       </div>
       <h1 className="mt-6 font-serif text-3xl font-bold text-maroon">
-        Email confirmed!
+        {t.auth.confirmTitle}
       </h1>
       <p className="mt-3 text-ink-soft">
-        Your account is now verified. You&apos;re all set to start learning.
+        {t.auth.confirmBody}
       </p>
       <div className="mt-8 flex gap-3">
         <Link
-          href="/dashboard"
+          href={`/${locale}/dashboard`}
           className="rounded-full bg-saffron px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-saffron-dark"
         >
-          Go to Dashboard
+          {t.auth.goDashboard}
         </Link>
         <Link
-          href="/chapters"
+          href={`/${locale}/chapters`}
           className="rounded-full border-2 border-saffron px-6 py-3 text-sm font-semibold text-saffron transition-colors hover:bg-saffron/10"
         >
-          Browse Chapters
+          {t.auth.browseChapters}
         </Link>
       </div>
     </div>

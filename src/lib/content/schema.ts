@@ -84,6 +84,7 @@ export interface ChapterSummaryMeta {
   sanskritName: string;
   subtitle: string;
   readingTimeMins: number;
+  quizQuestionCount: number;
   available: boolean;
 }
 

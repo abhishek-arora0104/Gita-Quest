@@ -1,10 +1,15 @@
 import { createBrowserClient } from "@supabase/ssr";
 
+// Cache the Supabase client in a module-level variable
+let client: ReturnType<typeof createBrowserClient> | undefined;
+
 /**
  * Supabase client for use in Client Components.
  * Reads env vars at call-time so auth state changes reflect.
  */
 export function createClient() {
+  if (client) return client;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -15,5 +20,6 @@ export function createClient() {
     );
   }
 
-  return createBrowserClient(url, anonKey);
+  client = createBrowserClient(url, anonKey);
+  return client;
 }
