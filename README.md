@@ -1,36 +1,152 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gita Quest
+
+> **Understand the Bhagavad Gita in Simple Language**
+
+Gita Quest is a beginner-friendly Bhagavad Gita learning platform. Read simplified chapter summaries, reflect, take quizzes, and earn XP / levels / badges / streaks.
+
+**Live demo:** coming soon
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) + React 19 |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS v4 |
+| Auth & DB | Supabase (Auth + Postgres + RLS) |
+| Fonts | Inter + Cormorant Garamond (Google Fonts) |
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- **Node.js** ≥ 18
+- **npm** ≥ 9 (or pnpm / yarn)
+- A [Supabase](https://supabase.com) project (free tier works)
+
+### 1. Clone & install
+
+```bash
+git clone <your-repo-url> gita-quest
+cd gita-quest
+npm install
+```
+
+### 2. Configure environment variables
+
+Copy the example file and fill in your Supabase credentials:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Open `.env.local` and set:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-public-key>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+You'll find these in **Supabase Dashboard → Settings → API**.
+
+### 3. Run the database migration
+
+Go to **Supabase Dashboard → SQL Editor → New query**, paste the contents of `supabase/migrations/0001_initial.sql`, and click **Run**.
+
+This creates:
+- 5 tables: `profiles`, `user_chapter_progress`, `user_quiz_attempts`, `user_xp_log`, `user_badges`
+- Row Level Security policies (owner-only)
+- Auto-profile creation trigger on signup
+- `updated_at` auto-touch triggers
+
+### 4. (Optional) Set up Google OAuth
+
+1. [Google Cloud Console](https://console.cloud.google.com) → Create a project
+2. **APIs & Services → OAuth consent screen** → External, add app name
+3. **Credentials → Create OAuth client ID** → Web application
+   - Authorized JS origin: `https://<your-project>.supabase.co`
+   - Authorized redirect URI: `https://<your-project>.supabase.co/auth/v1/callback`
+4. **Supabase Dashboard → Authentication → Providers → Google** → paste Client ID & Secret
+
+### 5. Start the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+src/
+├── actions/           # Server Actions (quiz, XP, streaks, auth)
+├── app/               # Next.js App Router pages
+│   ├── about/
+│   ├── auth/          # login, signup, forgot-password, reset-password, callback, confirm
+│   ├── chapters/      # chapter library + [slug] + [slug]/quiz
+│   └── dashboard/
+├── components/
+│   ├── auth/          # OAuthButtons, LogoutButton
+│   ├── chapter/       # ChapterContent, PracticalExampleList, ReflectionForm
+│   ├── gamification/  # XPBar, StreakCounter, BadgeGrid, DailyLoginButton
+│   ├── layout/        # SiteShell, Navbar, Footer
+│   ├── quiz/          # QuizEngine, QuizResults
+│   └── ui/            # Button, Card, ProgressBar, Badge, Input
+├── lib/
+│   ├── auth/          # session helpers (getCurrentUser, requireUser)
+│   ├── content/       # chapter data (static TS), schema, index
+│   ├── gamification/  # XP, levels, streaks, badges logic
+│   ├── supabase/      # client, server, middleware helpers
+│   └── utils/         # cn (className combiner)
+└── middleware.ts      # session refresh + route protection
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Content
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Chapter content lives in `src/lib/content/chapters/` as static TypeScript files. Currently **3 chapters** are fully written (1, 2, 6) with 15 coming-soon placeholders.
 
-## Deploy on Vercel
+See `CONTENT_GUIDE.md` for the structure, tone rules, and template for writing new chapters.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Gamification
+
+| Action | XP |
+|--------|-----|
+| Read summary | +50 |
+| Complete quiz | +100 |
+| Perfect quiz | +200 (replaces +100) |
+| Complete chapter | +150 (first time) |
+| Daily login | +10 (once/day) |
+
+**10 Levels:** Beginner → Seeker → Student → Practitioner → Disciplined Learner → Wisdom Explorer → Yogi → Gita Scholar → Spiritual Guide → Gita Master
+
+**10 Badges:** First Steps, Chapter Master, Quiz Champion, Century of Wisdom, Gita Explorer, 5-Day Streak, 7-Day Streak, 30-Day Streak, Gita Scholar, Gita Master
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run lint` | Run ESLint |
+| `npx tsc --noEmit` | Type-check without emitting |
+
+---
+
+## License
+
+All chapter summaries and quiz content are original and written for educational purposes.

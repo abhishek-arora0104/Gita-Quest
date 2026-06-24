@@ -1,26 +1,148 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Gita Quest — Warm Spiritual design system
+ * Palette: saffron, gold, deep maroon, cream, ink
+ */
+
+@theme {
+  /* Brand colors */
+  --color-saffron: #d97706;
+  --color-saffron-light: #f59e0b;
+  --color-saffron-dark: #b45309;
+
+  --color-gold: #c8a044;
+  --color-gold-light: #e0c878;
+  --color-gold-dark: #9a7a2e;
+
+  --color-maroon: #7c2d12;
+  --color-maroon-light: #9a3a1c;
+  --color-maroon-dark: #5c1f0c;
+
+  --color-cream: #fbf7ef;
+  --color-cream-deep: #f3ebd9;
+  --color-parchment: #f5eddd;
+
+  --color-ink: #3d2b1f;
+  --color-ink-soft: #6b5644;
+  --color-ink-muted: #9a8775;
+
+  --color-leaf: #4d7c5f;
+  --color-leaf-light: #6b9b7d;
+
+  /* Semantic tokens mapped to brand */
+  --color-background: var(--color-cream);
+  --color-foreground: var(--color-ink);
+  --color-primary: var(--color-saffron);
+  --color-primary-foreground: #ffffff;
+
+  /* Fonts */
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-cormorant);
+
+  /* Radius */
+  --radius-card: 1rem;
+  --radius-pill: 9999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans), Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings use the serif font */
+.font-serif,
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+}
+
+/* Subtle paper texture via layered gradients */
+.bg-paper {
+  background-color: var(--color-cream);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(200, 160, 68, 0.06), transparent 35%),
+    radial-gradient(circle at 88% 12%, rgba(217, 119, 6, 0.05), transparent 38%);
+}
+
+/* Ornamental divider */
+.divider-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--color-gold);
+}
+.divider-ornament::before,
+.divider-ornament::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  max-width: 6rem;
+  background: linear-gradient(
+    to var(--dir, right),
+    transparent,
+    var(--color-gold)
+  );
+}
+
+/* Focus ring for accessibility */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-saffron);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Hide scrollbar utility for horizontal chip rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Soft entrance animation for results / level-up moments */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-pop-in {
+  animation: pop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+/* Reading-friendly prose */
+.prose-gita p {
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+  color: var(--color-ink-soft);
+}
+.prose-gita p strong {
+  color: var(--color-ink);
 }
