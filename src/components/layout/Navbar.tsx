@@ -41,13 +41,13 @@ export async function Navbar({ locale }: { locale: Locale }) {
 
         <div className="hidden items-center gap-8 md:flex">
           <LanguageSwitcher locale={locale} />
-          <NavbarClient locale={locale} navLinks={navLinks} homePath={homePath} />
+          <NavbarClient locale={locale} navLinks={navLinks} homePath={homePath} showLinks />
         </div>
 
-        {/* Mobile: just the auth/menu button */}
+        {/* Mobile: auth button only — links live in the bottom strip */}
         <div className="flex items-center gap-2 md:hidden">
           <LanguageSwitcher locale={locale} compact />
-          <NavbarClient locale={locale} navLinks={navLinks} homePath={homePath} />
+          <NavbarClient locale={locale} showLinks={false} />
         </div>
       </nav>
 

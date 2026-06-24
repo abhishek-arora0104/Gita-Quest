@@ -14,10 +14,12 @@ export function NavbarClient({
   locale,
   navLinks = [],
   homePath,
+  showLinks = true,
 }: {
   locale: Locale;
   navLinks?: NavLink[];
   homePath?: string;
+  showLinks?: boolean;
 }) {
   const t = getDictionary(locale);
   const [user, setUser] = useState<User | null>();
@@ -25,9 +27,9 @@ export function NavbarClient({
 
   // Hide "Chapters" on the homepage
   const isHome = homePath ? pathname === homePath : false;
-  const visibleLinks = navLinks.filter(
-    (l) => !(isHome && l.href.endsWith("/chapters")),
-  );
+  const visibleLinks = showLinks
+    ? navLinks.filter((l) => !(isHome && l.href.endsWith("/chapters")))
+    : [];
 
   useEffect(() => {
     const supabase = createClient();
