@@ -25,10 +25,17 @@ export function NavbarClient({
   const [user, setUser] = useState<User | null>();
   const pathname = usePathname();
 
-  // Hide "Chapters" on the homepage
+  // Hide "Chapters" on the homepage, hide "Chapters" and "About" on the chapters list page
   const isHome = homePath ? pathname === homePath : false;
+  const isChaptersPage = homePath ? pathname === `${homePath}/chapters` : false;
   const visibleLinks = showLinks
-    ? navLinks.filter((l) => !(isHome && l.href.endsWith("/chapters")))
+    ? navLinks.filter((l) => {
+        const isChaptersLink = l.href.endsWith("/chapters");
+        const isAboutLink = l.href.endsWith("/about");
+        if (isHome && isChaptersLink) return false;
+        if (isChaptersPage && (isChaptersLink || isAboutLink)) return false;
+        return true;
+      })
     : [];
 
   useEffect(() => {
@@ -90,8 +97,9 @@ export function NavbarMobileStrip({
 }) {
   const pathname = usePathname();
   const isHome = pathname === homePath;
+  const isChaptersPage = pathname === `${homePath}/chapters`;
 
-  if (isHome) return null;
+  if (isHome || isChaptersPage) return null;
 
   const visibleLinks = navLinks.filter(
     (l) => !(isHome && l.href.endsWith("/chapters")),
