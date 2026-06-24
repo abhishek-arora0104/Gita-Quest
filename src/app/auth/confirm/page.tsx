@@ -29,7 +29,7 @@ export default function ConfirmPage() {
         Email confirmed!
       </h1>
       <p className="mt-3 text-ink-soft">
-        Your account is now verified. You're all set to start learning.
+        Your account is now verified. You&apos;re all set to start learning.
       </p>
       <div className="mt-8 flex gap-3">
         <Link

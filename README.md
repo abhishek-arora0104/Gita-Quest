@@ -113,7 +113,7 @@ src/
 
 ## Content
 
-Chapter content lives in `src/lib/content/chapters/` as static TypeScript files. Currently **3 chapters** are fully written (1, 2, 6) with 15 coming-soon placeholders.
+Chapter content lives in `src/lib/content/chapters/` as static TypeScript files. All **18 chapters** are written and registered, each with a simplified summary, practical examples, reflection prompts, and a 25-question quiz.
 
 See `CONTENT_GUIDE.md` for the structure, tone rules, and template for writing new chapters.
 

@@ -27,7 +27,7 @@ export interface QuizResult {
 }
 
 /**
- * Processes a completed quiz atomically:
+ * Processes a completed quiz:
  *  1. record the attempt,
  *  2. upsert progress (best score, attempts, completion, chapter completion),
  *  3. award XP (quiz complete / perfect / chapter complete),
@@ -91,12 +91,8 @@ export async function completeQuiz(
   const prevBest = existing?.best_score ?? 0;
   const prevAttempts = existing?.attempts ?? 0;
   const summaryAlreadyRead = existing?.summary_read ?? false;
-  const alreadyCompletedChapter = existing?.chapter_completed ?? false;
-
   const bestScore = Math.max(prevBest, correct);
-  const quizCompleted = true;
-  // A chapter is "completed" once the quiz is done (summary is optional but encouraged).
-  const chapterCompleted = quizCompleted;
+  const now = new Date().toISOString();
 
   const { error: progressError } = await supabase
     .from("user_chapter_progress")
@@ -106,16 +102,29 @@ export async function completeQuiz(
         chapter_number: chapterNumber,
         best_score: bestScore,
         attempts: prevAttempts + 1,
-        quiz_completed: quizCompleted,
-        chapter_completed: chapterCompleted,
-        last_attempt_at: new Date().toISOString(),
-        completed_at: chapterCompleted ? new Date().toISOString() : null,
+        quiz_completed: true,
+        last_attempt_at: now,
         // Preserve a previously-saved reflection/summary flag.
         summary_read: summaryAlreadyRead,
       },
       { onConflict: "user_id,chapter_number" },
     );
   if (progressError) return { ok: false, error: progressError.message };
+
+  // Gate first-completion XP behind an atomic false -> true update. If two
+  // submissions race, only one can update a previously incomplete row.
+  const { data: completionRows, error: completionError } = await supabase
+    .from("user_chapter_progress")
+    .update({
+      chapter_completed: true,
+      completed_at: now,
+    })
+    .eq("user_id", user.id)
+    .eq("chapter_number", chapterNumber)
+    .eq("chapter_completed", false)
+    .select("chapter_number");
+  if (completionError) return { ok: false, error: completionError.message };
+  const completedChapterNow = (completionRows ?? []).length > 0;
 
   // ── 3. Award XP. ──
   const xpEntries: { amount: number; reason: string }[] = [];
@@ -133,8 +142,8 @@ export async function completeQuiz(
     });
   }
 
-  // Chapter completion XP — only the first time the chapter is completed.
-  if (chapterCompleted && !alreadyCompletedChapter) {
+  // Chapter completion XP — only for the request that wins the completion gate.
+  if (completedChapterNow) {
     xpEntries.push({
       amount: XP_REWARDS.completeChapter,
       reason: "Completed chapter",
@@ -142,7 +151,7 @@ export async function completeQuiz(
   }
 
   if (xpEntries.length > 0) {
-    await supabase.from("user_xp_log").insert(
+    const { error: xpError } = await supabase.from("user_xp_log").insert(
       xpEntries.map((e) => ({
         user_id: user.id,
         amount: e.amount,
@@ -150,6 +159,7 @@ export async function completeQuiz(
         chapter_number: chapterNumber,
       })),
     );
+    if (xpError) return { ok: false, error: xpError.message };
   }
 
   const xpEarned = xpEntries.reduce((s, e) => s + e.amount, 0);
@@ -163,14 +173,12 @@ export async function completeQuiz(
   // ── Build the response. ──
   const { data: afterProfile } = await supabase
     .from("profiles")
-    .select("current_level, current_streak")
+    .select("total_xp, current_level, current_streak")
     .eq("id", user.id)
     .maybeSingle();
   const newLevel = afterProfile?.current_level ?? prevLevel;
   const leveledUp = newLevel > prevLevel;
-  const { name: newLevelName } = computeLevel(
-    (beforeProfile?.total_xp ?? 0) + xpEarned,
-  );
+  const { name: newLevelName } = computeLevel(afterProfile?.total_xp ?? 0);
 
   const newBadges = newBadgeIds
     .map((id) => BADGES_BY_ID[id])

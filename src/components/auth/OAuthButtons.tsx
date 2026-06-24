@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export function OAuthButtons() {
+export function OAuthButtons({
+  redirectTo = "/dashboard",
+}: {
+  redirectTo?: string;
+}) {
   const [loading, setLoading] = useState(false);
 
   async function handleGoogleLogin() {
@@ -12,7 +16,7 @@ export function OAuthButtons() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
       },
     });
     if (error) {

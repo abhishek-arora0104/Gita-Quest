@@ -8,8 +8,16 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
-export function LoginForm() {
+function safeRedirectPath(path: string | undefined): string {
+  if (!path || !path.startsWith("/") || path.startsWith("//")) {
+    return "/dashboard";
+  }
+  return path;
+}
+
+export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
+  const destination = safeRedirectPath(redirectTo);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -32,13 +40,13 @@ export function LoginForm() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(destination);
     router.refresh();
   }
 
   return (
     <div>
-      <OAuthButtons />
+      <OAuthButtons redirectTo={destination} />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input

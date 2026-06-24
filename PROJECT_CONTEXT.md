@@ -1,7 +1,7 @@
 # Gita Quest — Project Context
 
-> Last updated: Phase E complete, Phase F in progress
-> Date: 2026-06-23
+> Last updated: Review fixes complete; deployment pending
+> Date: 2026-06-24
 
 ---
 
@@ -12,7 +12,7 @@ Users read simplified chapter summaries, reflect, take quizzes, and earn XP/leve
 
 **Tech stack:** Next.js 16 (App Router) + TypeScript + Tailwind v4 + Supabase (Auth + Postgres)
 **Design:** Warm spiritual palette (saffron/gold/maroon/cream), Cormorant Garamond + Inter fonts, mobile-first
-**Content:** 3 fully written chapters (1, 2, 6) with summaries + 25-Q quizzes each; 15 "coming soon" placeholders
+**Content:** 18 fully written chapters with summaries + 25-question quizzes each
 **Scope:** MVP — all gamification, auth, SEO, responsive, accessible. No leaderboards/community/AI/audio.
 
 ---
@@ -224,12 +224,23 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 
 ---
 
+## Review Fixes — 2026-06-24
+
+- Fixed quiz results navigation by passing the real `chapterNumber` to the results screen instead of deriving it from the slug.
+- Fixed login redirects so `/auth/login?redirectTo=...` returns users to the protected path after email/password or Google OAuth login.
+- Hardened quiz completion XP so first-time chapter completion XP is gated by a conditional `chapter_completed = false -> true` update.
+- Fixed level-up display to compute the level name from the refreshed profile total XP.
+- Replaced deprecated `src/middleware.ts` with Next.js 16 `src/proxy.ts`.
+- Verified `npm run lint`, `npx tsc --noEmit`, and `npm run build` pass after the fixes.
+
+---
+
 ## Next Steps
 
 1. ~~SEO pass~~ ✅
 2. ~~Accessibility pass~~ ✅
 3. ~~README.md~~ ✅
 4. ~~CONTENT_GUIDE.md~~ ✅
-5. Write remaining 15 chapters (see CONTENT_GUIDE.md)
+5. ~~Write remaining 15 chapters~~ ✅
 6. Deploy to Vercel / production
 7. Submit Google OAuth app for verification (before public launch)

@@ -124,6 +124,7 @@ export function QuizEngine({
     return (
       <QuizResults
         result={result}
+        chapterNumber={chapterNumber}
         chapterSlug={chapterSlug}
         authenticated={authenticated}
       />

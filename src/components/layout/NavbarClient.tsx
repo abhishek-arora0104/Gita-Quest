@@ -6,8 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 export function NavbarClient() {
-  const [user, setUser] = useState<User | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [user, setUser] = useState<User | null>();
 
   useEffect(() => {
     const supabase = createClient();
@@ -17,11 +16,10 @@ export function NavbarClient() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
-    setMounted(true);
     return () => subscription.unsubscribe();
   }, []);
 
-  if (!mounted) {
+  if (user === undefined) {
     return <div className="h-9 w-24 animate-pulse rounded-full bg-parchment" />;
   }
 

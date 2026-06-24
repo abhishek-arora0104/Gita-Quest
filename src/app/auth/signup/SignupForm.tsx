@@ -46,11 +46,11 @@ export function SignupForm() {
       <div className="rounded-2xl border border-leaf/30 bg-leaf/5 p-6 text-center">
         <p className="text-lg font-semibold text-leaf">Check your email</p>
         <p className="mt-2 text-sm text-ink-soft">
-          We've sent a verification link to <strong>{email}</strong>. Click the
+          We&apos;ve sent a verification link to <strong>{email}</strong>. Click the
           link to activate your account.
         </p>
         <p className="mt-4 text-xs text-ink-muted">
-          Didn't receive it? Check your spam folder or{" "}
+          Didn&apos;t receive it? Check your spam folder or{" "}
           <button
             type="button"
             onClick={() => setEmailSent(false)}

@@ -6,7 +6,13 @@ export const metadata: Metadata = {
   description: "Log in to Gita Quest to continue learning.",
 };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirectTo?: string }>;
+}) {
+  const { redirectTo } = await searchParams;
+
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-16 sm:px-6">
       <div className="text-center">
@@ -18,7 +24,7 @@ export default function LoginPage() {
         </p>
       </div>
       <div className="mt-8">
-        <LoginForm />
+        <LoginForm redirectTo={redirectTo} />
       </div>
     </div>
   );

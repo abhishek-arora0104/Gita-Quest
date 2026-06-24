@@ -1,5 +1,4 @@
 import { BADGES } from "@/lib/gamification/badges";
-import { Badge } from "@/components/ui/Badge";
 
 export function BadgeGrid({
   earnedIds,

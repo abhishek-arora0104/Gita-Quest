@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils/cn";
-
 export function StreakCounter({
   current,
   longest,

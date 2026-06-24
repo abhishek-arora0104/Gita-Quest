@@ -50,11 +50,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     if ("href" in rest && rest.href !== undefined) {
       const { href, ...linkRest } = rest;
       // Filter out button-only props that aren't valid on anchors.
-      const {
-        type: _type,
-        disabled: _disabled,
-        ...anchorRest
-      } = linkRest as Record<string, unknown>;
+      const anchorRest = { ...(linkRest as Record<string, unknown>) };
+      delete anchorRest.type;
+      delete anchorRest.disabled;
       return (
         <Link href={href} className={classes} {...(anchorRest as object)}>
           {children}

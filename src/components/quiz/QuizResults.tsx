@@ -2,26 +2,24 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { getNextChapter } from "@/lib/content";
 import type { QuizResult } from "@/actions/completeQuiz";
 
 export function QuizResults({
   result,
+  chapterNumber,
   chapterSlug,
   authenticated,
 }: {
   result: QuizResult;
+  chapterNumber: number;
   chapterSlug: string;
   authenticated: boolean;
 }) {
   const pct = ((result.score ?? 0) / (result.total ?? 1)) * 100;
   const isPerfect = result.perfect ?? false;
-  const nextCh = getNextChapter(
-    // Derive chapter number from slug for the "next chapter" link.
-    parseInt(chapterSlug.replace(/\D/g, "") || "0", 10),
-  );
+  const nextCh = getNextChapter(chapterNumber);
 
   const message = isPerfect
     ? "Perfect score! 🎯"

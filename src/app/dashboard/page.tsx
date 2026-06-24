@@ -9,7 +9,6 @@ import { BadgeGrid } from "@/components/gamification/BadgeGrid";
 import { DailyLoginButton } from "@/components/gamification/DailyLoginButton";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { Card } from "@/components/ui/Card";
-import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Badge } from "@/components/ui/Badge";
 
 export const metadata: Metadata = {
@@ -151,7 +150,7 @@ export default async function DashboardPage() {
           Chapter Progress
         </h2>
         <p className="mt-1 text-sm text-ink-soft">
-          Track which chapters you've read and quizzed.
+          Track which chapters you&apos;ve read and quizzed.
         </p>
         <div className="mt-4 space-y-3">
           {library

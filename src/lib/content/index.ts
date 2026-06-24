@@ -6,6 +6,23 @@ import type {
 import { chapter1 } from "./chapters/chapter-01";
 import { chapter2 } from "./chapters/chapter-02";
 import { chapter6 } from "./chapters/chapter-06";
+import {
+  chapter3,
+  chapter4,
+  chapter5,
+  chapter7,
+  chapter8,
+  chapter9,
+  chapter10,
+  chapter11,
+  chapter12,
+  chapter13,
+  chapter14,
+  chapter15,
+  chapter16,
+  chapter17,
+  chapter18,
+} from "./chapters/remaining";
 
 /**
  * Fully written chapters, keyed by number.
@@ -14,27 +31,26 @@ import { chapter6 } from "./chapters/chapter-06";
 export const chaptersByNumber: Record<number, Chapter> = {
   1: chapter1,
   2: chapter2,
+  3: chapter3,
+  4: chapter4,
+  5: chapter5,
   6: chapter6,
+  7: chapter7,
+  8: chapter8,
+  9: chapter9,
+  10: chapter10,
+  11: chapter11,
+  12: chapter12,
+  13: chapter13,
+  14: chapter14,
+  15: chapter15,
+  16: chapter16,
+  17: chapter17,
+  18: chapter18,
 };
 
 /** Chapters that exist in the product but aren't written yet. */
-export const comingSoonChapters: ComingSoonChapter[] = [
-  { number: 3, title: "The Yoga of Action", sanskritName: "Karma Yoga", theme: "Selfless action in depth" },
-  { number: 4, title: "The Yoga of Knowledge", sanskritName: "Jnana Yoga", theme: "Wisdom and the nature of action" },
-  { number: 5, title: "The Yoga of Renunciation", sanskritName: "Karma Sanyasa Yoga", theme: "Renouncing while still acting" },
-  { number: 7, title: "Knowledge of the Absolute", sanskritName: "Jnana Vijnana Yoga", theme: "Knowing the Divine" },
-  { number: 8, title: "Attaining the Supreme", sanskritName: "Aksara Brahma Yoga", theme: "The eternal and devotion at death" },
-  { number: 9, title: "The King of Knowledge", sanskritName: "Raja Vidya Yoga", theme: "The most confidential wisdom" },
-  { number: 10, title: "Divine Manifestations", sanskritName: "Vibhuti Yoga", theme: "God's presence in all things" },
-  { number: 11, title: "The Universal Form", sanskritName: "Visvarupa Darshana Yoga", theme: "Krishna reveals his cosmic form" },
-  { number: 12, title: "The Yoga of Devotion", sanskritName: "Bhakti Yoga", theme: "The path of love and devotion" },
-  { number: 13, title: "Nature and the Self", sanskritName: "Ksetra Ksetrajna Vibhaga Yoga", theme: "Body, soul, and the knower" },
-  { number: 14, title: "The Three Modes", sanskritName: "Guna Traya Vibhaga Yoga", theme: "The gunas: goodness, passion, darkness" },
-  { number: 15, title: "The Supreme Person", sanskritName: "Purushottama Yoga", theme: "The Supreme Self beyond all" },
-  { number: 16, title: "Divine and Demoniac Natures", sanskritName: "Daivasura Sampad Vibhaga Yoga", theme: "Two paths of living" },
-  { number: 17, title: "The Threefold Faith", sanskritName: "Sraddha Traya Vibhaga Yoga", theme: "Faith shaped by the gunas" },
-  { number: 18, title: "The Path to Liberation", sanskritName: "Moksha Sanyasa Yoga", theme: "Final teachings and freedom" },
-];
+export const comingSoonChapters: ComingSoonChapter[] = [];
 
 /** All written chapter objects. */
 export const allChapters: Chapter[] = Object.values(chaptersByNumber).sort(
