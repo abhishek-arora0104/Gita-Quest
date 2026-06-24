@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NavbarClient, NavbarMobileStrip } from "./NavbarClient";
+import { NavbarScrollWrapper } from "./NavbarScrollWrapper";
 import { getDictionary } from "@/lib/i18n/dictionary";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import type { Locale } from "@/lib/i18n/config";
@@ -21,7 +22,7 @@ export async function Navbar({ locale }: { locale: Locale }) {
       >
         {t.nav.skip}
       </a>
-      <header className="sticky top-0 z-40 border-b border-gold/20 bg-cream/90 backdrop-blur-md">
+      <NavbarScrollWrapper>
       <nav
         className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"
         aria-label="Primary"
@@ -53,7 +54,7 @@ export async function Navbar({ locale }: { locale: Locale }) {
 
       {/* Mobile bottom nav strip — rendered client-side to respect homepage hiding */}
       <NavbarMobileStrip navLinks={navLinks} homePath={homePath} />
-    </header>
+      </NavbarScrollWrapper>
     </>
   );
 }
