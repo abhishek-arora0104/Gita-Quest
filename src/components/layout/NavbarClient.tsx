@@ -2,14 +2,32 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 import { getDictionary } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/config";
 
-export function NavbarClient({ locale }: { locale: Locale }) {
+type NavLink = { href: string; label: string; homeOnly: boolean };
+
+export function NavbarClient({
+  locale,
+  navLinks = [],
+  homePath,
+}: {
+  locale: Locale;
+  navLinks?: NavLink[];
+  homePath?: string;
+}) {
   const t = getDictionary(locale);
   const [user, setUser] = useState<User | null>();
+  const pathname = usePathname();
+
+  // Hide "Chapters" on the homepage
+  const isHome = homePath ? pathname === homePath : false;
+  const visibleLinks = navLinks.filter(
+    (l) => !(isHome && l.href.endsWith("/chapters")),
+  );
 
   useEffect(() => {
     const supabase = createClient();
@@ -22,41 +40,71 @@ export function NavbarClient({ locale }: { locale: Locale }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (user === undefined) {
-    return <div className="h-9 w-24 animate-pulse rounded-full bg-parchment" />;
-  }
+  return (
+    <div className="flex items-center gap-6">
+      {visibleLinks.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className="text-sm font-medium text-ink-soft transition-colors hover:text-saffron"
+        >
+          {link.label}
+        </Link>
+      ))}
 
-  if (!user) {
-    return (
-      <div className="flex items-center gap-3">
+      {user === undefined ? (
+        <div className="h-9 w-24 animate-pulse rounded-full bg-parchment" />
+      ) : !user ? (
         <Link
           href={`/${locale}/auth/login`}
-          className="text-sm font-medium text-ink-soft transition-colors hover:text-saffron"
+          className="rounded-full border-2 border-saffron px-4 py-2 text-sm font-semibold text-saffron transition-colors hover:bg-saffron hover:text-white"
         >
           {t.nav.login}
         </Link>
+      ) : (
         <Link
-          href={`/${locale}/auth/signup`}
-          className="rounded-full bg-saffron px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-saffron-dark"
+          href={`/${locale}/dashboard`}
+          className="flex items-center gap-2 rounded-full bg-saffron px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-saffron-dark"
         >
-          {t.nav.startLearning}
+          <span
+            aria-hidden="true"
+            className="grid h-5 w-5 place-items-center rounded-full bg-white/20 text-xs font-bold text-white"
+          >
+            {(user.email ?? "U").charAt(0).toUpperCase()}
+          </span>
+          {t.nav.dashboard}
         </Link>
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
+}
+
+export function NavbarMobileStrip({
+  navLinks,
+  homePath,
+}: {
+  navLinks: NavLink[];
+  homePath: string;
+}) {
+  const pathname = usePathname();
+  const isHome = pathname === homePath;
+  const visibleLinks = navLinks.filter(
+    (l) => !(isHome && l.href.endsWith("/chapters")),
+  );
+
+  if (visibleLinks.length === 0) return null;
 
   return (
-    <Link
-      href={`/${locale}/dashboard`}
-      className="flex items-center gap-2 rounded-full bg-parchment px-3 py-1.5 text-sm font-medium text-maroon transition-colors hover:bg-gold-light/40"
-    >
-      <span
-        aria-hidden="true"
-        className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-saffron to-maroon text-xs text-cream"
-      >
-        {(user.email ?? "U").charAt(0).toUpperCase()}
-      </span>
-      <span className="hidden sm:inline">{t.nav.dashboard}</span>
-    </Link>
+    <div className="flex border-t border-gold/10 bg-cream/50 px-4 py-2 md:hidden gap-6 justify-center">
+      {visibleLinks.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className="text-sm font-medium text-ink-soft transition-colors hover:text-saffron"
+        >
+          {link.label}
+        </Link>
+      ))}
+    </div>
   );
 }

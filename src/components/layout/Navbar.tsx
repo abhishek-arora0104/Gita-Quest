@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { NavbarClient } from "./NavbarClient";
+import { NavbarClient, NavbarMobileStrip } from "./NavbarClient";
 import { getDictionary } from "@/lib/i18n/dictionary";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import type { Locale } from "@/lib/i18n/config";
@@ -7,9 +7,10 @@ import type { Locale } from "@/lib/i18n/config";
 export async function Navbar({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
   const navLinks = [
-    { href: `/${locale}/chapters`, label: t.nav.chapters },
-    { href: `/${locale}/about`, label: t.nav.about },
+    { href: `/${locale}/chapters`, label: t.nav.chapters, homeOnly: false },
+    { href: `/${locale}/about`, label: t.nav.about, homeOnly: false },
   ];
+  const homePath = `/${locale}`;
 
   return (
     <>
@@ -39,38 +40,19 @@ export async function Navbar({ locale }: { locale: Locale }) {
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-ink-soft transition-colors hover:text-saffron"
-            >
-              {link.label}
-            </Link>
-          ))}
           <LanguageSwitcher locale={locale} />
-          <NavbarClient locale={locale} />
+          <NavbarClient locale={locale} navLinks={navLinks} homePath={homePath} />
         </div>
 
         {/* Mobile: just the auth/menu button */}
         <div className="flex items-center gap-2 md:hidden">
           <LanguageSwitcher locale={locale} compact />
-          <NavbarClient locale={locale} />
+          <NavbarClient locale={locale} navLinks={navLinks} homePath={homePath} />
         </div>
       </nav>
 
-      {/* Mobile bottom nav strip */}
-      <div className="flex border-t border-gold/10 bg-cream/50 px-4 py-2 md:hidden gap-6 justify-center">
-        {navLinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="text-sm font-medium text-ink-soft transition-colors hover:text-saffron"
-          >
-            {link.label}
-          </Link>
-        ))}
-      </div>
+      {/* Mobile bottom nav strip — rendered client-side to respect homepage hiding */}
+      <NavbarMobileStrip navLinks={navLinks} homePath={homePath} />
     </header>
     </>
   );
