@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { SiteShell } from "@/components/layout/SiteShell";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -63,6 +64,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-cream text-ink">
         <SiteShell>{children}</SiteShell>
+        <Analytics />
       </body>
     </html>
   );
