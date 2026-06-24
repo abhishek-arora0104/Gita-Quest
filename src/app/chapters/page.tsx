@@ -26,7 +26,7 @@ export default function ChaptersPage() {
           summary, practical examples, and a 25-question quiz.
         </p>
         <p className="mt-3 text-sm text-ink-muted">
-          {availableCount} of 18 chapters available · more added regularly
+          All {availableCount} chapters available
         </p>
       </header>
 
