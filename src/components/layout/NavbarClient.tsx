@@ -90,6 +90,9 @@ export function NavbarMobileStrip({
 }) {
   const pathname = usePathname();
   const isHome = pathname === homePath;
+
+  if (isHome) return null;
+
   const visibleLinks = navLinks.filter(
     (l) => !(isHome && l.href.endsWith("/chapters")),
   );
