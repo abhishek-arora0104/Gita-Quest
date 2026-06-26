@@ -47,6 +47,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Increase base font size from 16px to 18px (112.5%). 
+     This scales up all rem-based spacing and text sizes globally. */
+  font-size: 112.5%;
 }
 
 body {
@@ -139,6 +142,7 @@ h3 {
 
 /* Reading-friendly prose */
 .prose-gita p {
+  font-size: 1.125rem;
   line-height: 1.8;
   margin-bottom: 1.25rem;
   color: var(--color-ink-soft);

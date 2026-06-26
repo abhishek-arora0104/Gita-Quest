@@ -6,24 +6,19 @@ import { Badge } from "@/components/ui/Badge";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/config";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestLocale();
   const t = getDictionary(locale);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-  const langs: Record<string, string> = {
-    en: `${siteUrl}/en/chapters`,
-    hi: `${siteUrl}/hi/chapters`,
-    "x-default": `${siteUrl}/en/chapters`,
-  };
-
   return {
     title: t.chapters.title,
     description: t.chapters.subtitle,
     alternates: {
       canonical: `/${locale}/chapters`,
-      languages: langs,
+      languages: localeAlternates(siteUrl, "/chapters"),
     },
   };
 }
@@ -44,9 +39,7 @@ export default async function ChaptersPage() {
           {t.chapters.subtitle}
         </p>
         <p className="mt-3 text-sm text-ink-muted">
-          {locale === "hi"
-            ? `सभी ${availableCount} अध्याय उपलब्ध हैं`
-            : `All ${availableCount} chapters available`}
+          {availableCountCopy(locale, availableCount)}
         </p>
       </header>
 
@@ -127,4 +120,14 @@ function ChapterCard({
       </div>
     </Card>
   );
+}
+
+/** Localized "all N chapters available" line, mirroring the dictionary tone. */
+function availableCountCopy(locale: Locale, count: number): string {
+  const templates: Record<Locale, string> = {
+    en: `All ${count} chapters available`,
+    hi: `सभी ${count} अध्याय उपलब्ध हैं`,
+    hinglish: `Saare ${count} adhyay uplabdh hain`,
+  };
+  return templates[locale];
 }

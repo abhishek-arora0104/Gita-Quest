@@ -46,7 +46,7 @@ export function levelProgress(totalXp: number): {
   level: number;
   name: string;
   xpIntoLevel: number;
-  xpForNext: number | null; // null at max level
+  xpForNext: number | null; // null at max level, otherwise span of current level
   pctToNext: number; // 0–100, 100 at max level
 } {
   const { level, name } = computeLevel(totalXp);
@@ -70,7 +70,7 @@ export function levelProgress(totalXp: number): {
     level,
     name,
     xpIntoLevel: into,
-    xpForNext: next.minXp,
+    xpForNext: span,
     pctToNext: Math.min(100, Math.round((into / span) * 100)),
   };
 }

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/config";
 
 /**
  * Auth callback handler.
@@ -11,8 +12,9 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");
   let next = searchParams.get("next") ?? "/dashboard";
-  
-  const locale = request.cookies.get("gita-locale")?.value || "en";
+
+  const cookieLocale = request.cookies.get("gita-locale")?.value;
+  const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
   if (!next.startsWith(`/${locale}`)) {
     next = `/${locale}${next.startsWith("/") ? next : `/${next}`}`;
   }

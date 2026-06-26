@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestLocale();
   const t = getDictionary(locale);
   return {
-    title: locale === "hi" ? "पासवर्ड रीसेट करें" : "Reset password",
+    title: t.auth.resetTitle,
     description: t.auth.resetBody,
     robots: { index: false },
   };

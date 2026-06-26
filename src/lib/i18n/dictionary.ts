@@ -1,4 +1,5 @@
 import type { Locale } from "./config";
+import { hinglishDictionary } from "./hinglish";
 
 export const dictionaries = {
   en: {
@@ -522,6 +523,7 @@ export const dictionaries = {
       lockedSuffix: "(बंद)",
     },
   },
+  hinglish: hinglishDictionary,
 } as const;
 
 export type Dictionary = (typeof dictionaries)[Locale];

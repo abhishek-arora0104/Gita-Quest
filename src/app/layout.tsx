@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SiteShell } from "@/components/layout/SiteShell";
 import { getRequestLocale } from "@/lib/i18n/server";
+import { LOCALE_META } from "@/lib/i18n/config";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -33,8 +34,6 @@ export const metadata: Metadata = {
     default: "Gita Quest — Understand the Bhagavad Gita in Simple Language",
     template: "%s · Gita Quest",
   },
-  description:
-    "Read, learn, quiz, and grow through all 18 chapters of the Bhagavad Gita. Simplified summaries, practical examples, and engaging quizzes for beginners.",
   keywords: [
     "Bhagavad Gita",
     "Bhagavad Gita Chapter Summary",
@@ -47,16 +46,12 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     title: "Gita Quest — Understand the Bhagavad Gita in Simple Language",
-    description:
-      "Read, learn, quiz, and grow through all 18 chapters of the Bhagavad Gita.",
     siteName: "Gita Quest",
     url: siteUrl,
   },
   twitter: {
     card: "summary_large_image",
     title: "Gita Quest — Understand the Bhagavad Gita in Simple Language",
-    description:
-      "Read, learn, quiz, and grow through all 18 chapters of the Bhagavad Gita.",
   },
 };
 
@@ -68,8 +63,8 @@ export default async function RootLayout({
   const locale = await getRequestLocale();
   return (
     <html
-      lang={locale}
-      className={`${inter.variable} ${cormorant.variable} ${notoSerifDevanagari.variable} h-full antialiased`}
+      lang={LOCALE_META[locale].htmlLang}
+      className={`${inter.variable} ${cormorant.variable} ${notoSerifDevanagari.variable} h-full antialiased text-[18px] md:text-[20px]`}
     >
       <body className="min-h-full flex flex-col bg-cream text-ink">
         <SiteShell locale={locale}>{children}</SiteShell>

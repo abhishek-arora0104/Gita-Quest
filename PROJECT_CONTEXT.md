@@ -1,7 +1,7 @@
 # Gita Quest — Project Context
 
-> Last updated: Hindi localization complete and validated
-> Date: 2026-06-24
+> Last updated: Hinglish localization complete and validated (en / hi / hinglish)
+> Date: 2026-06-26
 
 ---
 
@@ -296,3 +296,46 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 6. ~~Finish Hindi localization~~ ✅
 7. Deploy to Vercel / production
 8. Submit Google OAuth app for verification (before public launch)
+
+---
+
+## Hinglish Localization — COMPLETE ✅
+
+**Goal:** Add a third fully supported locale, Hinglish, at `/hinglish/...` alongside `/en/...` and `/hi/...`.
+
+**Status:** Done · `npm run lint`, `npx tsc --noEmit`, and `npm run build` all pass. All locale routes return 200 (dashboard correctly redirects unauthenticated users). Content integrity verified: 18 chapters × 25 quiz questions (10 easy / 10 medium / 5 hard) in all three locales, with matching slugs.
+
+**Product decisions (locked):**
+- Locale URL segment: `/hinglish`
+- Language switcher label: `Hinglish`
+- Script/style: Roman Hindi / natural Hinglish adapted from the English content, not Devanagari Hindi.
+- SEO policy: index Hinglish pages; `hi-Latn` for hreflang/`<html lang>`; `hi_IN` for Open Graph locale.
+- Database scope: no Supabase schema changes; progress remains keyed by user + chapter number.
+
+**What was built:**
+- `src/lib/i18n/hinglish.ts` — complete Roman Hinglish UI dictionary (nav, footer, common, home, about, chapters, chapter, quiz, dashboard, reflection, auth, badges) mirroring the English/Hindi shape one-to-one.
+- `src/lib/content/hinglish/chapters.ts` — all 18 chapters with the same slugs/numbers as English/Hindi, each with 25 quiz questions (10/10/5) and valid `correctIndex`. Authored via a templated seed (same approach as the Hindi chapters).
+- Hinglish wired into `src/lib/content/index.ts` (`chaptersByLocale.hinglish`), so `getAllChapters`, `getChapterBySlugForLocale`, `getChapterByNumberForLocale`, `getLibraryList`, and quiz scoring all work with Hinglish.
+
+**Refactors (now locale-agnostic, no more `en/hi` hard-coding):**
+- `src/app/layout.tsx` renders `<html lang={LOCALE_META[locale].htmlLang}>` → Hinglish is `hi-Latn`. Removed the static `description` from root layout metadata so each page's localized description wins.
+- Homepage/about/chapters/chapter/quiz `generateMetadata` use `localeAlternates(siteUrl, path)` and `LOCALE_META[locale].ogLocale` instead of hand-built `en`/`hi`/`x-default` maps.
+- All `locale === "hi" ? ... : ...` page copy/metadata branches replaced with dictionary-driven strings or per-locale template maps (homepage title, chapters "available" count, quiz page description).
+- Auth page metadata (login/signup/forgot/reset) now reads titles from the dictionary for all three locales.
+- `LogoutButton` is now locale-aware (`locale` prop → `t.auth.logout`); dashboard passes the current locale.
+
+**SEO:**
+- `sitemap.ts` emits per-locale URLs (home/about/chapters-list/18 chapter pages) for `en`, `hi`, `hinglish` — 63 URLs total — each with `en`, `hi`, `hi-Latn` hreflang alternates.
+- `robots.ts` disallows `/dashboard`, `/profile`, `/auth/` for bare + all three locale-prefixed paths.
+- Hinglish public pages are indexed (canonical points to `/hinglish/...`); quiz pages remain `noindex`.
+
+**Verified (smoke tests against `next start`):**
+- Routes return 200: `/hinglish`, `/hinglish/about`, `/hinglish/chapters`, `/hinglish/chapters/arjunas-dilemma`, `/hinglish/chapters/arjunas-dilemma/quiz`, `/hinglish/auth/login`. `/hinglish/dashboard` returns 307 (auth redirect, expected).
+- `<html lang="hi-Latn">` on Hinglish pages.
+- Canonical points to `/hinglish/...`; hreflang alternates include `en`, `hi`, `hi-Latn`, `x-default`.
+- OG locale `hi_IN` for Hinglish; `noindex` on quiz pages.
+- Localized `<meta name="description">` and visible body copy render in Hinglish.
+- Language switcher preserves equivalent paths across EN / हिन्दी / Hinglish.
+
+**Content integrity script:** `scripts/verify-content.mjs` — run with `node --experimental-strip-types scripts/verify-content.mjs`. Validates 18 chapters/locale, matching slugs, 25 questions/chapter, 10/10/5 difficulty split, and valid `correctIndex` (0–3) for all three locales.
+

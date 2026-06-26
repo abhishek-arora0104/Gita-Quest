@@ -72,15 +72,21 @@ export async function refreshProfile(
   userId: string,
   clientDate?: string,
 ) {
-  // Current profile (for total_xp and streak state).
+  // Sum actual XP from the log table — the source of truth.
+  const { data: xpRows } = await supabase
+    .from("user_xp_log")
+    .select("amount")
+    .eq("user_id", userId);
+
+  const totalXp = (xpRows ?? []).reduce((sum, row) => sum + (row.amount ?? 0), 0);
+  const { level } = computeLevel(totalXp);
+
+  // Current profile for streak state.
   const { data: profile } = await supabase
     .from("profiles")
-    .select("total_xp, current_streak, longest_streak, last_active_date")
+    .select("current_streak, longest_streak, last_active_date")
     .eq("id", userId)
     .maybeSingle();
-
-  const totalXp = profile?.total_xp ?? 0;
-  const { level } = computeLevel(totalXp);
 
   const streak = updateStreak({
     currentStreak: profile?.current_streak ?? 0,
@@ -92,6 +98,7 @@ export async function refreshProfile(
   await supabase
     .from("profiles")
     .update({
+      total_xp: totalXp,
       current_level: level,
       current_streak: streak.currentStreak,
       longest_streak: streak.longestStreak,

@@ -118,7 +118,7 @@ export default async function DashboardPage() {
             t={t} 
             alreadyClaimed={profile?.daily_login_claimed === new Date().toISOString().slice(0, 10)} 
           />
-          <LogoutButton />
+          <LogoutButton locale={locale} />
         </div>
       </div>
 

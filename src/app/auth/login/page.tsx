@@ -3,10 +3,14 @@ import { LoginForm } from "./LoginForm";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
 
-export const metadata: Metadata = {
-  title: "Log in",
-  description: "Log in to Gita Quest to continue learning.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
+  return {
+    title: t.auth.loginTitle,
+    description: t.auth.loginBody,
+  };
+}
 
 export default async function LoginPage({
   searchParams,

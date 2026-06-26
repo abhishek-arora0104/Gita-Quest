@@ -40,15 +40,15 @@ export function ChapterContent({
       <section aria-labelledby="teachings">
         <SectionTitle>{t.chapter.mainTeachings}</SectionTitle>
         <div className="mt-4 space-y-4">
-          {chapter.mainTeachings.map((t, i) => (
+          {chapter.mainTeachings.map((teaching, i) => (
             <Card key={i}>
               <div className="p-5 sm:p-6">
                 <h4 className="font-serif text-xl font-semibold text-maroon">
                   <span className="mr-2 text-saffron">{i + 1}.</span>
-                  {t.heading}
+                  {teaching.heading}
                 </h4>
                 <div className="prose-gita mt-3">
-                  {t.body.split("\n\n").map((p, j) => (
+                  {teaching.body.split("\n\n").map((p, j) => (
                     <p key={j}>{p}</p>
                   ))}
                 </div>

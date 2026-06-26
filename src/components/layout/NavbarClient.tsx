@@ -101,15 +101,11 @@ export function NavbarMobileStrip({
 
   if (isHome || isChaptersPage) return null;
 
-  const visibleLinks = navLinks.filter(
-    (l) => !(isHome && l.href.endsWith("/chapters")),
-  );
-
-  if (visibleLinks.length === 0) return null;
+  if (navLinks.length === 0) return null;
 
   return (
     <div className="flex border-t border-gold/10 bg-cream/50 px-4 py-2 md:hidden gap-6 justify-center">
-      {visibleLinks.map((link) => (
+      {navLinks.map((link) => (
         <Link
           key={link.href}
           href={link.href}

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import type { Locale } from "@/lib/i18n/config";
-import { withLocale } from "@/lib/i18n/config";
+import { LOCALE_META, LOCALES, withLocale } from "@/lib/i18n/config";
 
 export function LanguageSwitcher({
   locale,
@@ -18,7 +18,7 @@ export function LanguageSwitcher({
       className="inline-flex rounded-full border border-gold/30 bg-white/70 p-0.5 text-xs font-semibold shadow-sm"
       aria-label="Language switcher"
     >
-      {(["en", "hi"] as const).map((target) => (
+      {LOCALES.map((target) => (
         <a
           key={target}
           href={withLocale(pathname, target)}
@@ -27,9 +27,11 @@ export function LanguageSwitcher({
               ? "bg-saffron text-white"
               : "text-ink-soft hover:bg-parchment"
           }`}
-          hrefLang={target}
+          hrefLang={LOCALE_META[target].hreflang}
         >
-          {compact ? target.toUpperCase() : target === "en" ? "EN" : "हिन्दी"}
+          {compact
+            ? LOCALE_META[target].compactLabel
+            : LOCALE_META[target].label}
         </a>
       ))}
     </div>

@@ -6,6 +6,13 @@ import { QuizEngine } from "@/components/quiz/QuizEngine";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/config";
+
+const QUIZ_DESCRIPTIONS: Record<Locale, (n: number, title: string) => string> = {
+  en: (n, title) => `Test your understanding of Chapter ${n}: ${title} with 25 questions.`,
+  hi: (n, title) => `अध्याय ${n}: ${title} की समझ जांचें — 25 प्रश्न।`,
+  hinglish: (n, title) => `Adhyay ${n}: ${title} ki samjh parkhein — 25 sawaal.`,
+};
 
 export function generateStaticParams() {
   return writtenChapterSlugs.map((slug) => ({ slug }));
@@ -23,9 +30,7 @@ export async function generateMetadata({
   const t = getDictionary(locale);
   return {
     title: `${t.quiz.titlePrefix}: ${chapter.title}`,
-    description: locale === "hi"
-      ? `अध्याय ${chapter.number}: ${chapter.title} की समझ जांचें — 25 प्रश्न।`
-      : `Test your understanding of Chapter ${chapter.number}: ${chapter.title} with 25 questions.`,
+    description: QUIZ_DESCRIPTIONS[locale](chapter.number, chapter.title),
     robots: { index: false },
   };
 }

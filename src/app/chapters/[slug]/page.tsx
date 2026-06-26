@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/Button";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
+import { LOCALE_META, localeAlternates } from "@/lib/i18n/config";
 
 export function generateStaticParams() {
   return writtenChapterSlugs.map((slug) => ({ slug }));
@@ -32,19 +33,13 @@ export async function generateMetadata({
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const url = `${siteUrl}/${locale}/chapters/${chapter.slug}`;
 
-  const languages: Record<string, string> = {
-    en: `${siteUrl}/en/chapters/${slug}`,
-    hi: `${siteUrl}/hi/chapters/${slug}`,
-    "x-default": `${siteUrl}/en/chapters/${slug}`,
-  };
-
   return {
     title: chapter.seo.metaTitle,
     description: chapter.seo.metaDescription,
     keywords: chapter.seo.keywords,
     alternates: {
       canonical: `/${locale}/chapters/${chapter.slug}`,
-      languages,
+      languages: localeAlternates(siteUrl, `/chapters/${slug}`),
     },
     openGraph: {
       type: "article",
@@ -52,7 +47,7 @@ export async function generateMetadata({
       description: chapter.seo.metaDescription,
       url,
       siteName: "Gita Quest",
-      locale: locale === "hi" ? "hi_IN" : "en_US",
+      locale: LOCALE_META[locale].ogLocale,
     },
     twitter: {
       card: "summary_large_image",
@@ -102,7 +97,7 @@ export default async function ChapterPage({
     description: chapter.seo.metaDescription,
     learningResourceType: "Article",
     educationalLevel: "Beginner",
-    inLanguage: locale,
+    inLanguage: LOCALE_META[locale].htmlLang,
     isPartOf: {
       "@type": "Book",
       name: "Bhagavad Gita",

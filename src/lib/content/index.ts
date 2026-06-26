@@ -26,6 +26,7 @@ import {
 } from "./chapters/remaining";
 import type { Locale } from "@/lib/i18n/config";
 import { hiChaptersByNumber } from "./hi/chapters";
+import { hinglishChaptersByNumber } from "./hinglish/chapters";
 
 /**
  * Fully written chapters, keyed by number.
@@ -57,6 +58,7 @@ export const chaptersByNumber = enChaptersByNumber;
 export const chaptersByLocale: Record<Locale, Record<number, Chapter>> = {
   en: enChaptersByNumber,
   hi: hiChaptersByNumber,
+  hinglish: hinglishChaptersByNumber,
 };
 
 /** Chapters that exist in the product but aren't written yet. */

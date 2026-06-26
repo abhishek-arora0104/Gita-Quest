@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestLocale();
   const t = getDictionary(locale);
   return {
-    title: locale === "hi" ? t.auth.signupTitle : "Create your account",
+    title: t.auth.signupTitle,
     description: t.auth.signupBody,
   };
 }

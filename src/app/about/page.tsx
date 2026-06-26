@@ -2,24 +2,19 @@ import type { Metadata } from "next";
 import { Card } from "@/components/ui/Card";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
+import { localeAlternates } from "@/lib/i18n/config";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestLocale();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const t = getDictionary(locale);
 
-  const langs: Record<string, string> = {
-    en: `${siteUrl}/en/about`,
-    hi: `${siteUrl}/hi/about`,
-    "x-default": `${siteUrl}/en/about`,
-  };
-
   return {
     title: t.about.title,
     description: t.about.intro1,
     alternates: {
       canonical: `/${locale}/about`,
-      languages: langs,
+      languages: localeAlternates(siteUrl, "/about"),
     },
   };
 }

@@ -1,11 +1,44 @@
-export const LOCALES = ["en", "hi"] as const;
+export const LOCALES = ["en", "hi", "hinglish"] as const;
 
 export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "en";
 
+export const LOCALE_META: Record<
+  Locale,
+  {
+    label: string;
+    compactLabel: string;
+    htmlLang: string;
+    hreflang: string;
+    ogLocale: string;
+  }
+> = {
+  en: {
+    label: "EN",
+    compactLabel: "EN",
+    htmlLang: "en",
+    hreflang: "en",
+    ogLocale: "en_US",
+  },
+  hi: {
+    label: "हिन्दी",
+    compactLabel: "HI",
+    htmlLang: "hi",
+    hreflang: "hi",
+    ogLocale: "hi_IN",
+  },
+  hinglish: {
+    label: "Hinglish",
+    compactLabel: "Hinglish",
+    htmlLang: "hi-Latn",
+    hreflang: "hi-Latn",
+    ogLocale: "hi_IN",
+  },
+};
+
 export function isLocale(value: string | undefined | null): value is Locale {
-  return value === "en" || value === "hi";
+  return LOCALES.includes(value as Locale);
 }
 
 export function getLocaleFromPath(pathname: string): Locale | null {
@@ -25,3 +58,19 @@ export function withLocale(pathname: string, locale: Locale): string {
   return cleanPath === "/" ? `/${locale}` : `/${locale}${cleanPath}`;
 }
 
+export function localeAlternates(
+  siteUrl: string,
+  pathname: string,
+): Record<string, string> {
+  const cleanPath = stripLocaleFromPath(pathname);
+  const suffix = cleanPath === "/" ? "" : cleanPath;
+  return {
+    ...Object.fromEntries(
+      LOCALES.map((locale) => [
+        LOCALE_META[locale].hreflang,
+        `${siteUrl}/${locale}${suffix}`,
+      ]),
+    ),
+    "x-default": `${siteUrl}/${DEFAULT_LOCALE}${suffix}`,
+  };
+}
