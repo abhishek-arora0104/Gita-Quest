@@ -11,6 +11,10 @@ import {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
   if (pathname === "/") {
     const cookieLocale = request.cookies.get("gita-locale")?.value;
     const preferredLocale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;

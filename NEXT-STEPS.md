@@ -31,6 +31,20 @@
 
 - Added migration: `supabase/migrations/20230101000002_quiz_mode_and_duration.sql`
 - Adds `user_quiz_attempts.mode` and `user_quiz_attempts.duration_ms`.
+- Added migration: `supabase/migrations/20230101000003_chat_messages.sql`
+- Adds optional signed-in user chatbot history via `user_chat_messages`.
+
+### Chatbot
+
+- Floating multilingual Gita helper mounted across the app.
+- Answers from local Gita Quest chapter content first.
+- Provides Gita Quest and Vedabase links for deeper reading.
+- Does not bulk-copy or store Vedabase text.
+- Uses Gemini by default when `CHATBOT_PROVIDER=gemini` and `GEMINI_API_KEY` are configured.
+- Also supports OpenAI when `CHATBOT_PROVIDER=openai` and `OPENAI_API_KEY` are configured.
+- Can answer outside the local Gita Quest knowledge base when `CHATBOT_ALLOW_GENERAL_FALLBACK=true`.
+- Falls back to short retrieval-only answers when AI is disabled or unavailable.
+- Keeps anonymous user chats session-local; stores signed-in turns only when the chat migration is applied.
 
 ---
 
@@ -58,15 +72,25 @@ Smoke-tested routes:
 
 ## Remaining Operational Steps
 
-1. Apply the latest Supabase migration before production use:
+1. Apply the latest Supabase migrations before production use:
 
 ```bash
 supabase db push
-# or run the SQL in supabase/migrations/20230101000002_quiz_mode_and_duration.sql
+# or run the SQL files in supabase/migrations/ in order
 ```
 
-2. Deploy to Vercel / production.
+2. Add production chatbot environment variables:
 
-3. Submit Google OAuth app for verification before public launch.
+```env
+CHATBOT_PROVIDER=gemini
+GEMINI_API_KEY=...
+GEMINI_CHAT_MODEL=gemini-3.5-flash
+CHATBOT_ENABLED=true
+CHATBOT_ALLOW_GENERAL_FALLBACK=true
+```
 
-4. Recommended before launch: human copy pass for Hindi and Hinglish content.
+3. Deploy to Vercel / production.
+
+4. Submit Google OAuth app for verification before public launch.
+
+5. Recommended before launch: human copy pass for Hindi and Hinglish content.

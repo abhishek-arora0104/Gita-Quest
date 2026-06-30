@@ -1,6 +1,6 @@
 # Gita Quest — Project Context
 
-> Last updated: Quiz enhancements complete and validated (modes, filters, review, flashcards)
+> Last updated: Chatbot V1 implemented (local content retrieval + Vedabase links)
 > Date: 2026-06-30
 
 ---
@@ -368,3 +368,31 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 - `npm run lint`
 - `npm run build` (requires network access for Google Fonts via `next/font`)
 - Routes `/en/chapters/arjunas-dilemma/flashcards`, `/hi/chapters/arjunas-dilemma/flashcards`, `/hinglish/chapters/arjunas-dilemma/flashcards`, `/en/chapters/arjunas-dilemma/quiz`, and `/hinglish/chapters/arjunas-dilemma/quiz` return 200.
+
+---
+
+## Chatbot V1 — COMPLETE ✅
+
+**Goal:** Add a multilingual Gita tutor that answers from Gita Quest content and links to Vedabase for deeper reading without ingesting Vedabase text.
+
+**Status:** Done · Floating widget, retrieval layer, API route, optional signed-in history migration, and docs added.
+
+**What was built:**
+- Floating `ChatbotWidget` mounted in `SiteShell` for all locales.
+- `POST /api/chat` route using Gemini or OpenAI through server-side `fetch`.
+- Retrieval over existing static chapter content: intros, story summaries, teachings, practical examples, takeaways, lessons, reflection prompts, and quiz explanations.
+- Curated Vedabase Bhagavad-gita chapter links generated per relevant chapter.
+- Guardrails: off-topic redirect, short beginner-friendly answers, no invented verse quotes, no pre-attempt quiz answer-key disclosure, and study-support disclaimer.
+- Fallback retrieval-only answers when the configured provider key is missing or `CHATBOT_ENABLED=false`.
+- Optional signed-in chat history table via `supabase/migrations/20230101000003_chat_messages.sql`.
+
+**Environment:**
+- `CHATBOT_PROVIDER` (`gemini`, `openai`, or `fallback`)
+- `GEMINI_API_KEY`
+- `GEMINI_CHAT_MODEL` (default recommendation: `gemini-3.5-flash`)
+- Optional OpenAI alternative: `OPENAI_API_KEY`, `OPENAI_CHAT_MODEL`
+- `CHATBOT_ENABLED`
+- `CHATBOT_ALLOW_GENERAL_FALLBACK` (when true, the configured AI provider may answer outside the local knowledge base)
+
+**Policy decision:**
+- Vedabase is used only as cited external links in V1. No Vedabase text is bulk-copied, stored, or embedded unless explicit permission is obtained later.

@@ -50,6 +50,11 @@ Open `.env.local` and set:
 NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-public-key>
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+CHATBOT_PROVIDER=gemini
+GEMINI_API_KEY=<your-gemini-api-key>
+GEMINI_CHAT_MODEL=gemini-3.5-flash
+CHATBOT_ENABLED=true
+CHATBOT_ALLOW_GENERAL_FALLBACK=true
 ```
 
 You'll find these in **Supabase Dashboard → Settings → API**.
@@ -64,6 +69,7 @@ This creates:
 - Auto-profile creation trigger on signup
 - `updated_at` auto-touch triggers
 - Quiz attempt metadata for timed mode (`mode`, `duration_ms`)
+- Optional signed-in chatbot history (`user_chat_messages`)
 
 ### 4. (Optional) Set up Google OAuth
 
@@ -135,6 +141,19 @@ See `CONTENT_GUIDE.md` for the structure, tone rules, and template for writing n
 **10 Badges:** First Steps, Chapter Master, Quiz Champion, Century of Wisdom, Gita Explorer, 5-Day Streak, 7-Day Streak, 30-Day Streak, Gita Scholar, Gita Master
 
 Filtered difficulty quizzes are treated as practice attempts: they score only the attempted questions and do not award full-quiz XP or mark the chapter quiz complete. Full standard/timed quiz attempts continue to drive chapter progress and XP.
+
+---
+
+## Chatbot
+
+Gita Quest includes a floating multilingual Gita helper. It answers from local in-repo chapter content first and provides Gita Quest / Vedabase links for deeper reading.
+
+- Uses `CHATBOT_PROVIDER=gemini` with `GEMINI_API_KEY` by default, or `CHATBOT_PROVIDER=openai` with `OPENAI_API_KEY`.
+- Uses local Gita Quest chapter content first. If no local match is found and `CHATBOT_ALLOW_GENERAL_FALLBACK=true`, the selected AI provider may answer from general model knowledge.
+- Falls back to short retrieval-only answers if the provider key is missing or `CHATBOT_ENABLED=false`.
+- Does not bulk-copy or store Vedabase text.
+- Stores optional chat history only for signed-in users via `user_chat_messages`.
+- Anonymous users keep chat state in the browser session only.
 
 ---
 
