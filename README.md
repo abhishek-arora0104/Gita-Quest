@@ -50,11 +50,9 @@ Open `.env.local` and set:
 NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-public-key>
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-CHATBOT_PROVIDER=gemini
 GEMINI_API_KEY=<your-gemini-api-key>
 GEMINI_CHAT_MODEL=gemini-3.5-flash
 CHATBOT_ENABLED=true
-CHATBOT_ALLOW_GENERAL_FALLBACK=true
 ```
 
 You'll find these in **Supabase Dashboard → Settings → API**.
@@ -146,11 +144,11 @@ Filtered difficulty quizzes are treated as practice attempts: they score only th
 
 ## Chatbot
 
-Gita Quest includes a floating multilingual Gita helper. It answers from local in-repo chapter content first, then uses the selected AI provider when the local knowledge is not enough.
+Gita Quest includes a floating multilingual Gita helper. It uses Gemini directly for detailed answers in English, Hindi, and Hinglish.
 
-- Uses `CHATBOT_PROVIDER=gemini` with `GEMINI_API_KEY` by default, or `CHATBOT_PROVIDER=openai` with `OPENAI_API_KEY`.
-- Uses local Gita Quest chapter content first. If no local match is found and `CHATBOT_ALLOW_GENERAL_FALLBACK=true`, the selected AI provider may answer from general model knowledge.
-- Falls back to short retrieval-only answers if the provider key is missing or `CHATBOT_ENABLED=false`.
+- Requires `GEMINI_API_KEY`.
+- Does not use the local chapter knowledge base for answers.
+- Returns an error if Gemini is unavailable or `CHATBOT_ENABLED=false`.
 - Does not show Vedabase links or bulk-copy/store Vedabase text.
 - Stores optional chat history only for signed-in users via `user_chat_messages`.
 - Anonymous users keep chat state in the browser session only.

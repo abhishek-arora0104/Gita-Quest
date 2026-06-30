@@ -37,13 +37,12 @@
 ### Chatbot
 
 - Floating multilingual Gita helper mounted across the app.
-- Answers from local Gita Quest chapter content first.
-- Provides Gita Quest chapter links for deeper reading.
+- Uses Gemini directly for detailed answers.
+- Does not use local chapter retrieval for chatbot answers.
+- Does not show source links.
 - Does not show Vedabase links or bulk-copy/store Vedabase text.
-- Uses Gemini by default when `CHATBOT_PROVIDER=gemini` and `GEMINI_API_KEY` are configured.
-- Also supports OpenAI when `CHATBOT_PROVIDER=openai` and `OPENAI_API_KEY` are configured.
-- Can answer outside the local Gita Quest knowledge base when `CHATBOT_ALLOW_GENERAL_FALLBACK=true`.
-- Falls back to short retrieval-only answers when AI is disabled or unavailable.
+- Requires `GEMINI_API_KEY`.
+- Returns an error when Gemini is disabled or unavailable.
 - Keeps anonymous user chats session-local; stores signed-in turns only when the chat migration is applied.
 
 ---
@@ -82,11 +81,9 @@ supabase db push
 2. Add production chatbot environment variables:
 
 ```env
-CHATBOT_PROVIDER=gemini
 GEMINI_API_KEY=...
 GEMINI_CHAT_MODEL=gemini-3.5-flash
 CHATBOT_ENABLED=true
-CHATBOT_ALLOW_GENERAL_FALLBACK=true
 ```
 
 3. Deploy to Vercel / production.

@@ -1,6 +1,6 @@
 # Gita Quest — Project Context
 
-> Last updated: Chatbot V1 implemented (local content retrieval + Gemini/OpenAI fallback)
+> Last updated: Chatbot uses Gemini directly for detailed answers
 > Date: 2026-06-30
 
 ---
@@ -373,26 +373,23 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 
 ## Chatbot V1 — COMPLETE ✅
 
-**Goal:** Add a multilingual Gita tutor that answers from Gita Quest content first, then uses Gemini/OpenAI when local context is insufficient.
+**Goal:** Add a multilingual Gita tutor that uses Gemini directly for detailed answers without local retrieval.
 
-**Status:** Done · Floating widget, retrieval layer, API route, optional signed-in history migration, and docs added.
+**Status:** Done · Floating widget, Gemini API route, optional signed-in history migration, and docs added.
 
 **What was built:**
 - Floating `ChatbotWidget` mounted in `SiteShell` for all locales.
-- `POST /api/chat` route using Gemini or OpenAI through server-side `fetch`.
-- Retrieval over existing static chapter content: intros, story summaries, teachings, practical examples, takeaways, lessons, reflection prompts, and quiz explanations.
-- Gita Quest chapter links generated per relevant chapter.
-- Guardrails: off-topic redirect, short beginner-friendly answers, no invented verse quotes, no pre-attempt quiz answer-key disclosure, and study-support disclaimer.
-- Fallback retrieval-only answers when the configured provider key is missing or `CHATBOT_ENABLED=false`.
+- `POST /api/chat` route using Gemini through server-side `fetch`.
+- No local chapter retrieval for chatbot answers.
+- No source links returned in chatbot responses.
+- Guardrails: detailed beginner-friendly answers, no invented exact verse quotes, no pre-attempt quiz answer-key disclosure, no Vedabase links, and study-support disclaimer.
+- Returns an error when Gemini is unavailable, the key is missing, or `CHATBOT_ENABLED=false`.
 - Optional signed-in chat history table via `supabase/migrations/20230101000003_chat_messages.sql`.
 
 **Environment:**
-- `CHATBOT_PROVIDER` (`gemini`, `openai`, or `fallback`)
 - `GEMINI_API_KEY`
 - `GEMINI_CHAT_MODEL` (default recommendation: `gemini-3.5-flash`)
-- Optional OpenAI alternative: `OPENAI_API_KEY`, `OPENAI_CHAT_MODEL`
 - `CHATBOT_ENABLED`
-- `CHATBOT_ALLOW_GENERAL_FALLBACK` (when true, the configured AI provider may answer outside the local knowledge base)
 
 **Policy decision:**
 - Vedabase links are not shown in the chatbot. No Vedabase text is bulk-copied, stored, or embedded unless explicit permission is obtained later.

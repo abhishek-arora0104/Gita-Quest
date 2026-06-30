@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -11,13 +10,6 @@ type ChatMessage = {
   id: string;
   role: ChatRole;
   content: string;
-  sources?: ChatSource[];
-};
-
-type ChatSource = {
-  title: string;
-  href: string;
-  type: "chapter";
 };
 
 const MAX_HISTORY_FOR_API = 8;
@@ -72,7 +64,6 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
       });
       const data = (await response.json()) as {
         answer?: string;
-        sources?: ChatSource[];
         error?: string;
       };
 
@@ -87,7 +78,6 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
           id: crypto.randomUUID(),
           role: "assistant",
           content: answer,
-          sources: data.sources ?? [],
         },
       ]);
     } catch (err) {
@@ -130,7 +120,7 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
 
           <div className="flex-1 space-y-3 overflow-y-auto p-4">
             {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} copy={copy} />
+              <MessageBubble key={message.id} message={message} />
             ))}
             {loading && (
               <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-white px-4 py-3 text-sm text-ink-soft shadow-sm">
@@ -183,13 +173,7 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
   );
 }
 
-function MessageBubble({
-  message,
-  copy,
-}: {
-  message: ChatMessage;
-  copy: ReturnType<typeof getChatCopy>;
-}) {
+function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
   return (
@@ -202,30 +186,6 @@ function MessageBubble({
       )}
     >
       <p className="whitespace-pre-wrap">{message.content}</p>
-      {!isUser && message.sources && message.sources.length > 0 && (
-        <div className="mt-3 space-y-1 border-t border-gold/20 pt-2">
-          <p className="text-xs font-semibold text-maroon">{copy.sources}</p>
-          {message.sources.slice(0, 4).map((source) => {
-            const external = source.href.startsWith("http");
-            const className = "block text-xs font-medium text-saffron hover:underline";
-            return external ? (
-              <a
-                key={source.href}
-                href={source.href}
-                target="_blank"
-                rel="noreferrer"
-                className={className}
-              >
-                {source.title}
-              </a>
-            ) : (
-              <Link key={source.href} href={source.href} className={className}>
-                {source.title}
-              </Link>
-            );
-          })}
-        </div>
-      )}
     </article>
   );
 }
@@ -235,14 +195,13 @@ function getChatCopy(locale: Locale) {
     return {
       button: "Gita सहायक",
       title: "Gita सहायक",
-      subtitle: "अध्यायों से सरल उत्तर",
+      subtitle: "Gemini से विस्तृत उत्तर",
       welcome:
         "हरे कृष्ण। Bhagavad Gita, किसी अध्याय, quiz, meditation, karma, या daily life application पर प्रश्न पूछें।",
       placeholder: "अपना प्रश्न लिखें...",
       send: "भेजें",
       thinking: "सोच रहा हूँ...",
       close: "चैट बंद करें",
-      sources: "स्रोत",
       error: "अभी उत्तर नहीं मिल पाया। कृपया फिर कोशिश करें।",
       disclaimer: "अध्ययन सहायता के लिए, आध्यात्मिक अधिकार नहीं।",
     };
@@ -251,14 +210,13 @@ function getChatCopy(locale: Locale) {
     return {
       button: "Gita helper",
       title: "Gita helper",
-      subtitle: "Chapters se simple jawab",
+      subtitle: "Gemini se detailed jawab",
       welcome:
         "Hare Krishna. Bhagavad Gita, kisi chapter, quiz, meditation, karma, ya daily life application par sawaal poochhein.",
       placeholder: "Apna sawaal likhein...",
       send: "Bhejein",
       thinking: "Soch raha hoon...",
       close: "Chat band karein",
-      sources: "Sources",
       error: "Abhi answer nahi mil paya. Kripya phir try karein.",
       disclaimer: "Study support ke liye, spiritual authority nahi.",
     };
@@ -266,14 +224,13 @@ function getChatCopy(locale: Locale) {
   return {
     button: "Gita helper",
     title: "Gita helper",
-    subtitle: "Simple answers from your chapters",
+    subtitle: "Detailed answers with Gemini",
     welcome:
       "Hare Krishna. Ask about a chapter, quiz idea, meditation, karma, dharma, or applying the Gita in daily life.",
     placeholder: "Ask a Gita question...",
     send: "Send",
     thinking: "Thinking...",
     close: "Close chat",
-    sources: "Sources",
     error: "I could not answer right now. Please try again.",
     disclaimer: "For study support, not spiritual authority.",
   };
