@@ -12,6 +12,17 @@ import { refreshProfile, evaluateAndAwardBadges } from "./markSummaryRead";
 import { BADGES_BY_ID } from "@/lib/gamification/badges";
 import type { Locale } from "@/lib/i18n/config";
 
+export type QuizMode = "standard" | "timed";
+
+export interface QuizOpts {
+  /** Whether this was a timed attempt. Persisted on the attempt row. */
+  mode?: QuizMode;
+  /** Total elapsed time in milliseconds, captured client-side. */
+  durationMs?: number;
+  /** Full-question indexes included in this attempt. Omitted/empty means all. */
+  questionIndexes?: number[];
+}
+
 export interface QuizResult {
   ok: boolean;
   error?: string;
@@ -25,6 +36,8 @@ export interface QuizResult {
   newLevelName?: string;
   newBadges?: { id: string; name: string; icon: string; description: string }[];
   streak?: number;
+  mode?: QuizMode;
+  durationMs?: number;
 }
 
 /**
@@ -36,13 +49,15 @@ export interface QuizResult {
  *  5. evaluate badges.
  *
  * `answers` is an array of the option index chosen for each question
- * (or null if skipped), in question order.
+ * (or null if skipped), in question order — always the FULL question set,
+ * even on a difficulty-filtered run (filtered-out questions are `null`).
  */
 export async function completeQuiz(
   chapterNumber: number,
   answers: (number | null)[],
   locale: Locale = "en",
   clientDate?: string,
+  opts?: QuizOpts,
 ): Promise<QuizResult> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Not authenticated" };
@@ -54,11 +69,26 @@ export async function completeQuiz(
 
   // ── Score the attempt against the source-of-truth questions. ──
   const questions = chapter.quiz;
+  const questionIndexes =
+    opts?.questionIndexes && opts.questionIndexes.length > 0
+      ? Array.from(
+          new Set(
+            opts.questionIndexes.filter(
+              (idx) => Number.isInteger(idx) && idx >= 0 && idx < questions.length,
+            ),
+          ),
+        ).sort((a, b) => a - b)
+      : questions.map((_, idx) => idx);
+  if (questionIndexes.length === 0) {
+    return { ok: false, error: "No valid questions submitted" };
+  }
+  const isFullAttempt = questionIndexes.length === questions.length;
   let correct = 0;
-  questions.forEach((q, i) => {
+  questionIndexes.forEach((i) => {
+    const q = questions[i];
     if (answers[i] === q.correctIndex) correct += 1;
   });
-  const total = questions.length;
+  const total = questionIndexes.length;
   const { points, perfect } = computeQuizScore(correct, total);
 
   // Capture the level BEFORE awarding XP, to detect a level-up.
@@ -69,6 +99,9 @@ export async function completeQuiz(
     .maybeSingle();
   const prevLevel = beforeProfile?.current_level ?? 1;
 
+  const mode: QuizMode = opts?.mode ?? "standard";
+  const durationMs = opts?.durationMs;
+
   // ── 1. Record the attempt. ──
   const { error: attemptError } = await supabase
     .from("user_quiz_attempts")
@@ -78,8 +111,33 @@ export async function completeQuiz(
       answers: answers,
       score: correct,
       total,
+      mode,
+      duration_ms: durationMs,
     });
   if (attemptError) return { ok: false, error: attemptError.message };
+
+  if (!isFullAttempt) {
+    await refreshProfile(supabase, user.id, clientDate);
+    const { data: afterProfile } = await supabase
+      .from("profiles")
+      .select("current_streak")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    return {
+      ok: true,
+      score: correct,
+      total,
+      points,
+      perfect,
+      xpEarned: 0,
+      leveledUp: false,
+      newBadges: [],
+      streak: afterProfile?.current_streak ?? 0,
+      mode,
+      durationMs,
+    };
+  }
 
   // ── 2. Upsert progress. ──
   const { data: existing } = await supabase
@@ -205,5 +263,7 @@ export async function completeQuiz(
     newLevelName: leveledUp ? newLevelName : undefined,
     newBadges,
     streak: afterProfile?.current_streak ?? 0,
+    mode,
+    durationMs,
   };
 }

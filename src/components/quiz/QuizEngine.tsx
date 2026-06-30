@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,8 @@ import { QuizResults } from "./QuizResults";
 import { cn } from "@/lib/utils/cn";
 import type { Dictionary } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/config";
+import type { QuizSetup } from "./QuizModePicker";
+import type { ReviewItem } from "./QuizReview";
 
 type QuestionForClient = {
   id: string;
@@ -30,6 +32,8 @@ const difficultyTone = {
   hard: "saffron",
 } as const;
 
+const ALL_DIFFICULTIES: QuestionForClient["difficulty"][] = [];
+
 export function QuizEngine({
   chapterNumber,
   chapterSlug,
@@ -38,6 +42,7 @@ export function QuizEngine({
   authenticated,
   t,
   locale,
+  setup,
 }: {
   chapterNumber: number;
   chapterSlug: string;
@@ -46,6 +51,7 @@ export function QuizEngine({
   authenticated: boolean;
   t: Dictionary;
   locale: Locale;
+  setup?: QuizSetup;
 }) {
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -54,13 +60,148 @@ export function QuizEngine({
     () => questions.map(() => null),
   );
   const [result, setResult] = useState<QuizResult | null>(null);
+  const [reviewData, setReviewData] = useState<ReviewItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState(() => Math.max(60, questions.length * 12));
   const [, startTransition] = useTransition();
+  const startedAt = useRef<number | null>(null);
+  const submittedRef = useRef(false);
+  const setupDifficulties = setup?.difficulties ?? ALL_DIFFICULTIES;
 
-  const q = questions[current];
-  const key = answerKey[current];
+  const questionIndexes = useMemo(() => {
+    if (!setupDifficulties.length) {
+      return questions.map((_, idx) => idx);
+    }
+    const selectedDifficulties = new Set(setupDifficulties);
+    return questions
+      .map((q, idx) => (selectedDifficulties.has(q.difficulty) ? idx : -1))
+      .filter((idx) => idx >= 0);
+  }, [questions, setupDifficulties]);
+
+  const displayedQuestions = questionIndexes.map((idx) => questions[idx]);
+  const displayedAnswerKey = questionIndexes.map((idx) => answerKey[idx]);
+  const fullQuestionIndex = questionIndexes[current] ?? 0;
+  const q = displayedQuestions[current] ?? questions[0];
+  const key = displayedAnswerKey[current] ?? answerKey[0];
+  const totalQuestions = displayedQuestions.length;
+  const isTimed = setup?.mode === "timed";
+  const filteredLabel = setup?.difficulties.length
+    ? setup.difficulties.map((d) => diffLabel(t, d)).join(", ")
+    : null;
   const isCorrect = revealed && selected === key.correctIndex;
+
+  const buildReviewData = useCallback(
+    (finalAnswers: (number | null)[]): ReviewItem[] =>
+      questionIndexes.map((i) => {
+        const question = questions[i];
+        return {
+          question: question.question,
+          options: question.options,
+          chosenIndex: finalAnswers[i] ?? null,
+          correctIndex: answerKey[i].correctIndex,
+          explanation: answerKey[i].explanation,
+        };
+      }),
+    [answerKey, questionIndexes, questions],
+  );
+
+  const answersWithCurrentSelection = useCallback(
+    (sourceAnswers: (number | null)[] = answers) => {
+      if (revealed || selected === null || fullQuestionIndex === undefined) {
+        return sourceAnswers;
+      }
+      const next = [...sourceAnswers];
+      next[fullQuestionIndex] = selected;
+      return next;
+    },
+    [answers, fullQuestionIndex, revealed, selected],
+  );
+
+  const submit = useCallback(
+    async (sourceAnswers: (number | null)[] = answers) => {
+      if (submittedRef.current) return;
+      const finalAnswers = answersWithCurrentSelection(sourceAnswers);
+      submittedRef.current = true;
+      setSubmitting(true);
+      setSubmitError(null);
+      setReviewData(buildReviewData(finalAnswers));
+
+      const durationMs = Date.now() - (startedAt.current ?? Date.now());
+      startTransition(async () => {
+        if (authenticated) {
+          const clientDate = new Date().toISOString().slice(0, 10);
+          const res = await completeQuiz(chapterNumber, finalAnswers, locale, clientDate, {
+            mode: setup?.mode ?? "standard",
+            durationMs: isTimed ? durationMs : undefined,
+            questionIndexes,
+          });
+          if (!res.ok) {
+            submittedRef.current = false;
+            setSubmitError(res.error ?? "Something went wrong.");
+            setSubmitting(false);
+            return;
+          }
+          setResult(res);
+          setSubmitting(false);
+        } else {
+          const correct = questionIndexes.reduce(
+            (sum, i) =>
+              sum + (finalAnswers[i] === answerKey[i].correctIndex ? 1 : 0),
+            0,
+          );
+          const perfect = correct === questionIndexes.length;
+          setResult({
+            ok: true,
+            score: correct,
+            total: questionIndexes.length,
+            points: correct * 10 + (perfect ? 50 : 0) + 25,
+            perfect,
+            xpEarned: 0,
+            leveledUp: false,
+            newBadges: [],
+            streak: 0,
+            mode: setup?.mode ?? "standard",
+            durationMs: isTimed ? durationMs : undefined,
+          });
+          setSubmitting(false);
+        }
+      });
+    },
+    [
+      answerKey,
+      answers,
+      answersWithCurrentSelection,
+      authenticated,
+      buildReviewData,
+      chapterNumber,
+      isTimed,
+      locale,
+      questionIndexes,
+      setup?.mode,
+      startTransition,
+    ],
+  );
+
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
+
+  useEffect(() => {
+    if (!isTimed || result || submittedRef.current) return;
+    const timer = window.setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          window.clearInterval(timer);
+          void submit();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [isTimed, result, submit]);
 
   function handleSelect(idx: number) {
     if (revealed) return;
@@ -72,55 +213,19 @@ export function QuizEngine({
     setRevealed(true);
     setAnswers((prev) => {
       const next = [...prev];
-      next[current] = selected;
+      next[fullQuestionIndex] = selected;
       return next;
     });
   }
 
   function handleNext() {
-    if (current < questions.length - 1) {
+    if (current < totalQuestions - 1) {
       setCurrent((c) => c + 1);
       setSelected(null);
       setRevealed(false);
     } else {
       void submit();
     }
-  }
-
-  async function submit() {
-    setSubmitting(true);
-    setSubmitError(null);
-    startTransition(async () => {
-      if (authenticated) {
-        const clientDate = new Date().toISOString().slice(0, 10);
-        const res = await completeQuiz(chapterNumber, answers, locale, clientDate);
-        if (!res.ok) {
-          setSubmitError(res.error ?? "Something went wrong.");
-          setSubmitting(false);
-          return;
-        }
-        setResult(res);
-        setSubmitting(false);
-      } else {
-        const correct = questions.reduce(
-          (s, _q, i) =>
-            s + (answers[i] === answerKey[i].correctIndex ? 1 : 0),
-          0,
-        );
-        setResult({
-          ok: true,
-          score: correct,
-          total: questions.length,
-          points: correct * 10 + 25,
-          perfect: correct === questions.length,
-          xpEarned: 0,
-          leveledUp: false,
-          newBadges: [],
-          streak: 0,
-        });
-        setSubmitting(false);
-      }
-    });
   }
 
   // ── Results screen ──
@@ -133,7 +238,16 @@ export function QuizEngine({
         authenticated={authenticated}
         t={t}
         locale={locale}
+        reviewData={reviewData}
       />
+    );
+  }
+
+  if (!q || !key || totalQuestions === 0) {
+    return (
+      <div className="rounded-card border border-gold/30 bg-parchment/60 p-6 text-center text-sm text-ink-soft">
+        {t.common.notQuite}
+      </div>
     );
   }
 
@@ -142,17 +256,36 @@ export function QuizEngine({
     <div>
       {/* Header: progress + score tracker */}
       <div className="mb-6">
-        <div className="mb-2 flex items-center justify-between text-sm">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm">
           <span className="font-medium text-ink-soft">
-            {t.quiz.question} {current + 1} {t.quiz.of} {questions.length}
+            {t.quiz.question} {current + 1} {t.quiz.of} {totalQuestions}
           </span>
-          <Badge variant={difficultyTone[q.difficulty]}>
-            {q.difficulty}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            {filteredLabel && (
+              <Badge variant="muted">
+                {t.quiz.filtered}: {filteredLabel}
+              </Badge>
+            )}
+            {isTimed && (
+              <span
+                className={cn(
+                  "rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+                  timeLeft < 10
+                    ? "border-red-300 bg-red-50 text-red-700"
+                    : "border-gold/30 bg-parchment text-ink-soft",
+                )}
+              >
+                {t.quiz.timer}: {formatTime(timeLeft)}
+              </span>
+            )}
+            <Badge variant={difficultyTone[q.difficulty]}>
+              {q.difficulty}
+            </Badge>
+          </div>
         </div>
         <ProgressBar
           value={current + (revealed ? 1 : 0)}
-          max={questions.length}
+          max={totalQuestions}
           label={t.quiz.progress}
         />
         <LiveScore answers={answers} answerKey={answerKey} t={t} />
@@ -258,11 +391,11 @@ export function QuizEngine({
             <Button
               onClick={handleNext}
               disabled={submitting}
-              variant={current === questions.length - 1 ? "secondary" : "primary"}
+              variant={current === totalQuestions - 1 ? "secondary" : "primary"}
             >
               {submitting
                 ? t.quiz.calculating
-                : current === questions.length - 1
+                : current === totalQuestions - 1
                   ? t.quiz.seeResults
                   : t.quiz.nextQuestion}
             </Button>
@@ -281,6 +414,23 @@ export function QuizEngine({
       </p>
     </div>
   );
+}
+
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+function diffLabel(t: Dictionary, d: QuestionForClient["difficulty"]): string {
+  switch (d) {
+    case "easy":
+      return t.quiz.diffEasy;
+    case "medium":
+      return t.quiz.diffMedium;
+    case "hard":
+      return t.quiz.diffHard;
+  }
 }
 
 /** Live score tracker shown while taking the quiz. */

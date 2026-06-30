@@ -71,7 +71,7 @@ export default async function DashboardPage() {
       .eq("user_id", user.id),
     supabase
       .from("user_quiz_attempts")
-      .select("score, total")
+      .select("score, total, mode, duration_ms")
       .eq("user_id", user.id),
   ]);
 
@@ -91,6 +91,20 @@ export default async function DashboardPage() {
   const totalCorrect = attempts.reduce((s, a) => s + (a.score ?? 0), 0);
   const avgAccuracy =
     totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+  const timedAttempts = attempts.filter((a) => a.mode === "timed");
+  const bestTimed = timedAttempts.length
+    ? timedAttempts.reduce((best, attempt) => {
+        const bestScore = best.score ?? 0;
+        const attemptScore = attempt.score ?? 0;
+        if (attemptScore !== bestScore) {
+          return attemptScore > bestScore ? attempt : best;
+        }
+        return (attempt.duration_ms ?? Number.MAX_SAFE_INTEGER) <
+          (best.duration_ms ?? Number.MAX_SAFE_INTEGER)
+          ? attempt
+          : best;
+      })
+    : null;
 
   // Chapters completed count.
   const chaptersCompleted = progress.filter((p) => p.chapter_completed).length;
@@ -143,6 +157,14 @@ export default async function DashboardPage() {
             <p className="mt-1 text-xs text-ink-muted">
               {totalCorrect}/{totalQuestions} {t.dashboard.correct}
             </p>
+            {bestTimed && (
+              <p className="mt-2 text-xs text-ink-muted">
+                ⏱ Best timed: {bestTimed.score}/{bestTimed.total}
+                {bestTimed.duration_ms ? (
+                  <> · {Math.round(bestTimed.duration_ms / 1000)}s</>
+                ) : null}
+              </p>
+            )}
           </div>
         </Card>
         <Card>

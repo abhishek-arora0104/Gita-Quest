@@ -1,7 +1,7 @@
 # Gita Quest — Project Context
 
-> Last updated: Hinglish localization complete and validated (en / hi / hinglish)
-> Date: 2026-06-26
+> Last updated: Quiz enhancements complete and validated (modes, filters, review, flashcards)
+> Date: 2026-06-30
 
 ---
 
@@ -339,3 +339,32 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 
 **Content integrity script:** `scripts/verify-content.mjs` — run with `node --experimental-strip-types scripts/verify-content.mjs`. Validates 18 chapters/locale, matching slugs, 25 questions/chapter, 10/10/5 difficulty split, and valid `correctIndex` (0–3) for all three locales.
 
+---
+
+## Quiz Enhancements — COMPLETE ✅
+
+**Goal:** Add richer quiz study modes without breaking the core XP/progress model.
+
+**Status:** Done · `npm run lint`, `npx tsc --noEmit`, and `npm run build` pass. Flashcard and quiz routes smoke-tested across locales.
+
+**What was built:**
+- `QuizModePicker` setup screen before each quiz.
+- Standard and timed modes. Timed mode shows a countdown, auto-submits at zero, and persists `duration_ms`.
+- Difficulty filters for easy/medium/hard practice runs.
+- `completeQuiz()` now accepts `opts.questionIndexes` so filtered practice attempts score only attempted questions.
+- Filtered practice attempts do not mark the full chapter quiz complete and do not award full quiz/chapter XP.
+- Timed auto-submit preserves the currently selected answer even if the user has not clicked "Check answer."
+- `QuizReview` displays attempted questions, selected answer, correct answer, explanation, and localized skipped-answer labels.
+- Flashcard revision route at `/{locale}/chapters/{slug}/flashcards`, powered by key takeaways, key lessons, and reflection prompts.
+- Flashcard CTAs on chapter pages and quiz results.
+- Dashboard shows the best timed attempt with score and duration.
+- Chapter CTA button sizing tightened so quiz and flashcard actions stay compact and single-line.
+
+**Database:**
+- `supabase/migrations/20230101000002_quiz_mode_and_duration.sql` adds `mode` and `duration_ms` to `user_quiz_attempts`.
+
+**Verified:**
+- `npx tsc --noEmit`
+- `npm run lint`
+- `npm run build` (requires network access for Google Fonts via `next/font`)
+- Routes `/en/chapters/arjunas-dilemma/flashcards`, `/hi/chapters/arjunas-dilemma/flashcards`, `/hinglish/chapters/arjunas-dilemma/flashcards`, `/en/chapters/arjunas-dilemma/quiz`, and `/hinglish/chapters/arjunas-dilemma/quiz` return 200.

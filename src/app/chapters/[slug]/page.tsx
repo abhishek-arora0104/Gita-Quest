@@ -185,9 +185,19 @@ export default async function ChapterPage({
           </div>
         )}
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Button href={`/${locale}/chapters/${chapter.slug}/quiz`} size="lg">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Button
+            href={`/${locale}/chapters/${chapter.slug}/quiz`}
+            className="min-h-12 whitespace-nowrap px-6 py-3 text-base sm:w-auto"
+          >
             {progress?.quiz_completed ? t.chapter.retakeQuiz : t.chapter.startQuiz}
+          </Button>
+          <Button
+            href={`/${locale}/chapters/${chapter.slug}/flashcards`}
+            variant="outline"
+            className="min-h-12 whitespace-nowrap px-6 py-3 text-base sm:w-auto"
+          >
+            {t.chapter.flashcards}
           </Button>
           {user && (
             <ChapterActionsClient

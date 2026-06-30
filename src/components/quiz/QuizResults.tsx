@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { getNextChapterForLocale } from "@/lib/content";
+import { QuizReview, type ReviewItem } from "./QuizReview";
 import type { QuizResult } from "@/actions/completeQuiz";
 import type { Dictionary } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/config";
@@ -15,6 +17,7 @@ export function QuizResults({
   authenticated,
   t,
   locale,
+  reviewData,
 }: {
   result: QuizResult;
   chapterNumber: number;
@@ -22,7 +25,9 @@ export function QuizResults({
   authenticated: boolean;
   t: Dictionary;
   locale: Locale;
+  reviewData?: ReviewItem[];
 }) {
+  const [showReview, setShowReview] = useState(false);
   const pct = ((result.score ?? 0) / (result.total ?? 1)) * 100;
   const isPerfect = result.perfect ?? false;
   const nextCh = getNextChapterForLocale(chapterNumber, locale);
@@ -77,6 +82,20 @@ export function QuizResults({
           </p>
         )}
       </div>
+
+      {reviewData && reviewData.length > 0 && (
+        <div className="space-y-4">
+          <div className="text-center">
+            <Button
+              variant="outline"
+              onClick={() => setShowReview((open) => !open)}
+            >
+              {showReview ? t.quiz.reviewHide : t.quiz.reviewAnswers}
+            </Button>
+          </div>
+          {showReview && <QuizReview items={reviewData} t={t} />}
+        </div>
+      )}
 
       {/* Rewards (authenticated only) */}
       {authenticated && (
@@ -158,6 +177,13 @@ export function QuizResults({
           size="lg"
         >
           {t.chapter.retakeQuiz}
+        </Button>
+        <Button
+          href={`/${locale}/chapters/${chapterSlug}/flashcards`}
+          variant="ghost"
+          size="lg"
+        >
+          {t.quiz.flashcards}
         </Button>
         {nextCh ? (
           <Button

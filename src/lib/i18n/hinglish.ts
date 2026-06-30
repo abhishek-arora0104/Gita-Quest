@@ -143,6 +143,7 @@ export const hinglishDictionary = {
     markRead: "Summary padha hua mark karein (+50 XP)",
     saving: "Save ho raha hai…",
     continue: "Aage badhein →",
+    flashcards: "Flashcard revision →",
   },
   quiz: {
     titlePrefix: "Quiz",
@@ -181,6 +182,38 @@ export const hinglishDictionary = {
     signupCta: "Free account banayein",
     signupSuffix:
       "taaki aapka score save ho, XP mile aur badge mil sakein.",
+    // ── Mode picker + timed mode ──
+    modeStandard: "Standard",
+    modeStandardBody: "Apni speed se jawab dein. Har uttar ke baad turant feedback milega.",
+    modeTimed: "Timed",
+    modeTimedBody: "Ghadi se daud. Samay khatam hote hi auto-submit ho jayega.",
+    timedBudget: "minute budget",
+    setupTitle: "Apna quiz set karein",
+    setupSubtitle: "Mode chunein aur kaun se sawaal hal karne hain.",
+    timer: "Time left",
+    timesUp: "Time's up!",
+    startQuiz: "Quiz shuru karein →",
+    // ── Difficulty filter ──
+    difficulty: "Difficulty",
+    diffAll: "Saare sawaal",
+    diffEasy: "Easy",
+    diffMedium: "Medium",
+    diffHard: "Hard",
+    filtered: "filtered",
+    // ── Review ──
+    reviewAnswers: "Uttar review",
+    reviewHide: "Review chhupayein",
+    yourChoice: "Aapka uttar",
+    correctAnswer: "Sahi uttar",
+    skipped: "Jawab nahi diya",
+    // ── Flashcards ──
+    flashcards: "Flashcards",
+    flashcardsTitle: "Flashcard revision",
+    flashcardsBody: "Mukhya baaton aur seekhon ko flip karke yaad rakhein.",
+    flip: "Flip karne ke liye tap karein",
+    prev: "← Pichla",
+    next: "Agla →",
+    shuffle: "Shuffle",
   },
   dashboard: {
     welcome: "Swagat hai",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getChapterBySlugForLocale, writtenChapterSlugs } from "@/lib/content";
-import { QuizEngine } from "@/components/quiz/QuizEngine";
+import { QuizPageClient } from "@/components/quiz/QuizPageClient";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
@@ -95,7 +95,7 @@ export default async function QuizPage({
       ) : null}
 
       <div className="mt-8">
-        <QuizEngine
+        <QuizPageClient
           chapterNumber={chapter.number}
           chapterSlug={chapter.slug}
           questions={questionsForClient}
