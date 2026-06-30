@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -185,9 +185,63 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           : "rounded-bl-sm bg-white text-ink-soft",
       )}
     >
-      <p className="whitespace-pre-wrap">{message.content}</p>
+      <div className="whitespace-pre-wrap">
+        <FormattedMessage content={message.content} />
+      </div>
     </article>
   );
+}
+
+function FormattedMessage({ content }: { content: string }) {
+  const lines = content.split("\n");
+
+  return (
+    <>
+      {lines.map((line, index) => (
+        <span key={`${line}-${index}`}>
+          {formatInlineMarkdown(line)}
+          {index < lines.length - 1 ? "\n" : null}
+        </span>
+      ))}
+    </>
+  );
+}
+
+function formatInlineMarkdown(text: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  const pattern = /(\*\*[^*]+\*\*|\*[^*]+\*)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    const token = match[0];
+    const key = `${match.index}-${token}`;
+    if (token.startsWith("**")) {
+      parts.push(
+        <strong key={key} className="font-semibold text-ink">
+          {token.slice(2, -2)}
+        </strong>,
+      );
+    } else {
+      parts.push(
+        <em key={key} className="italic">
+          {token.slice(1, -1)}
+        </em>,
+      );
+    }
+
+    lastIndex = match.index + token.length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts;
 }
 
 function getChatCopy(locale: Locale) {
