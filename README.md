@@ -146,12 +146,12 @@ Filtered difficulty quizzes are treated as practice attempts: they score only th
 
 ## Chatbot
 
-Gita Quest includes a floating multilingual Gita helper. It answers from local in-repo chapter content first and provides Gita Quest / Vedabase links for deeper reading.
+Gita Quest includes a floating multilingual Gita helper. It answers from local in-repo chapter content first, then uses the selected AI provider when the local knowledge is not enough.
 
 - Uses `CHATBOT_PROVIDER=gemini` with `GEMINI_API_KEY` by default, or `CHATBOT_PROVIDER=openai` with `OPENAI_API_KEY`.
 - Uses local Gita Quest chapter content first. If no local match is found and `CHATBOT_ALLOW_GENERAL_FALLBACK=true`, the selected AI provider may answer from general model knowledge.
 - Falls back to short retrieval-only answers if the provider key is missing or `CHATBOT_ENABLED=false`.
-- Does not bulk-copy or store Vedabase text.
+- Does not show Vedabase links or bulk-copy/store Vedabase text.
 - Stores optional chat history only for signed-in users via `user_chat_messages`.
 - Anonymous users keep chat state in the browser session only.
 

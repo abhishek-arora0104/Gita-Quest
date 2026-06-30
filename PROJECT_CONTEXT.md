@@ -1,6 +1,6 @@
 # Gita Quest — Project Context
 
-> Last updated: Chatbot V1 implemented (local content retrieval + Vedabase links)
+> Last updated: Chatbot V1 implemented (local content retrieval + Gemini/OpenAI fallback)
 > Date: 2026-06-30
 
 ---
@@ -373,7 +373,7 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 
 ## Chatbot V1 — COMPLETE ✅
 
-**Goal:** Add a multilingual Gita tutor that answers from Gita Quest content and links to Vedabase for deeper reading without ingesting Vedabase text.
+**Goal:** Add a multilingual Gita tutor that answers from Gita Quest content first, then uses Gemini/OpenAI when local context is insufficient.
 
 **Status:** Done · Floating widget, retrieval layer, API route, optional signed-in history migration, and docs added.
 
@@ -381,7 +381,7 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 - Floating `ChatbotWidget` mounted in `SiteShell` for all locales.
 - `POST /api/chat` route using Gemini or OpenAI through server-side `fetch`.
 - Retrieval over existing static chapter content: intros, story summaries, teachings, practical examples, takeaways, lessons, reflection prompts, and quiz explanations.
-- Curated Vedabase Bhagavad-gita chapter links generated per relevant chapter.
+- Gita Quest chapter links generated per relevant chapter.
 - Guardrails: off-topic redirect, short beginner-friendly answers, no invented verse quotes, no pre-attempt quiz answer-key disclosure, and study-support disclaimer.
 - Fallback retrieval-only answers when the configured provider key is missing or `CHATBOT_ENABLED=false`.
 - Optional signed-in chat history table via `supabase/migrations/20230101000003_chat_messages.sql`.
@@ -395,4 +395,4 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 - `CHATBOT_ALLOW_GENERAL_FALLBACK` (when true, the configured AI provider may answer outside the local knowledge base)
 
 **Policy decision:**
-- Vedabase is used only as cited external links in V1. No Vedabase text is bulk-copied, stored, or embedded unless explicit permission is obtained later.
+- Vedabase links are not shown in the chatbot. No Vedabase text is bulk-copied, stored, or embedded unless explicit permission is obtained later.

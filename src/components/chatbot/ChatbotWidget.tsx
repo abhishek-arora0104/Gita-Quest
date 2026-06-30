@@ -17,7 +17,7 @@ type ChatMessage = {
 type ChatSource = {
   title: string;
   href: string;
-  type: "chapter" | "vedabase";
+  type: "chapter";
 };
 
 const MAX_HISTORY_FOR_API = 8;

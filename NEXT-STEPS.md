@@ -38,8 +38,8 @@
 
 - Floating multilingual Gita helper mounted across the app.
 - Answers from local Gita Quest chapter content first.
-- Provides Gita Quest and Vedabase links for deeper reading.
-- Does not bulk-copy or store Vedabase text.
+- Provides Gita Quest chapter links for deeper reading.
+- Does not show Vedabase links or bulk-copy/store Vedabase text.
 - Uses Gemini by default when `CHATBOT_PROVIDER=gemini` and `GEMINI_API_KEY` are configured.
 - Also supports OpenAI when `CHATBOT_PROVIDER=openai` and `OPENAI_API_KEY` are configured.
 - Can answer outside the local Gita Quest knowledge base when `CHATBOT_ALLOW_GENERAL_FALLBACK=true`.

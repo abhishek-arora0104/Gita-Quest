@@ -5,7 +5,7 @@ import type { Locale } from "@/lib/i18n/config";
 export interface ChatSource {
   title: string;
   href: string;
-  type: "chapter" | "vedabase";
+  type: "chapter";
 }
 
 export interface ChatContext {
@@ -45,8 +45,6 @@ const STOP_WORDS = new Set([
   "your",
 ]);
 
-const VEDABASE_GITA_BASE = "https://vedabase.io/en/library/bg";
-
 export function retrieveChatContexts({
   query,
   locale,
@@ -59,6 +57,11 @@ export function retrieveChatContexts({
   const terms = tokenize(query);
   const chapterHint = extractChapterHint(query);
   const chapters = getAllChapters(locale);
+
+  if (chapterHint !== null) {
+    const chapter = chapters.find((item) => item.number === chapterHint);
+    return chapter ? [toContext(chapter, locale, 10)] : [];
+  }
 
   return chapters
     .map((chapter) => {
@@ -177,11 +180,6 @@ function toContext(chapter: Chapter, locale: Locale, score: number): ChatContext
         title: `Gita Quest: Chapter ${chapter.number}`,
         href: `/${locale}/chapters/${chapter.slug}`,
         type: "chapter",
-      },
-      {
-        title: `Vedabase: Bhagavad-gita Chapter ${chapter.number}`,
-        href: `${VEDABASE_GITA_BASE}/${chapter.number}/`,
-        type: "vedabase",
       },
     ],
   };

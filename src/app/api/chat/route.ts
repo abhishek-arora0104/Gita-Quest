@@ -283,17 +283,21 @@ function systemPrompt(
     "You are the Gita Quest tutor, a beginner-friendly Bhagavad Gita study assistant.",
     `Reply in ${language}.`,
     hasLocalContext
-      ? "Use the provided Gita Quest context first for factual claims."
+      ? allowGeneralKnowledge
+        ? "Use the provided Gita Quest context first. If it is incomplete, continue with your general knowledge so the user gets a useful complete answer."
+        : "Use only the provided Gita Quest context for factual claims."
       : allowGeneralKnowledge
-        ? "No matching Gita Quest context was found. You may use general knowledge to answer, but be clear that the answer is not from the local Gita Quest knowledge base."
+        ? "No matching Gita Quest context was found. Use your general knowledge to answer the user well."
         : "Use only the provided Gita Quest context for factual claims.",
     "Do not quote long scripture passages. Do not invent verse numbers or Sanskrit quotes.",
     allowGeneralKnowledge
       ? "If the question is unrelated to the Bhagavad Gita, answer briefly and invite the user back to Gita study."
       : "If the question is unrelated to the Bhagavad Gita, politely redirect to Gita learning.",
-    "If the context is insufficient, say you are not sure and suggest the closest chapter link.",
+    allowGeneralKnowledge
+      ? "Do not stop with 'I am not sure' only because the provided context is short. Use general knowledge to fill gaps, while keeping the answer practical and grounded."
+      : "If the context is insufficient, say you are not sure and suggest the closest chapter link.",
     "Keep answers short: 2-4 paragraphs or up to 5 bullets.",
-    "Mention Vedabase only as a deeper-study reference, not as ingested source text.",
+    "Do not mention or link Vedabase.",
     "Do not reveal quiz answer keys before a user has attempted a quiz.",
   ].join("\n");
 }
@@ -434,7 +438,7 @@ function localizedCopy(locale: Locale) {
         "मैं Gita Quest का अध्ययन सहायक हूँ। कृपया Bhagavad Gita, किसी अध्याय, ध्यान, कर्म, धर्म, या जीवन में लागू करने से जुड़ा प्रश्न पूछें।",
       serviceIssue:
         "AI सेवा अभी उपलब्ध नहीं है, इसलिए मैं उपलब्ध Gita Quest सामग्री से छोटा उत्तर दे रहा हूँ।",
-      deeper: "अधिक गहराई से पढ़ने के लिए नीचे दिए गए Gita Quest और Vedabase लिंक देखें।",
+      deeper: "अधिक गहराई से पढ़ने के लिए नीचे दिए गए Gita Quest chapter लिंक देखें।",
       disclaimer: "अध्ययन सहायता के लिए, आध्यात्मिक अधिकार नहीं।",
     };
   }
@@ -446,7 +450,7 @@ function localizedCopy(locale: Locale) {
         "Main Gita Quest ka study helper hoon. Kripya Bhagavad Gita, kisi chapter, dhyan, karma, dharma, ya daily life application par sawaal poochhein.",
       serviceIssue:
         "AI service abhi available nahi hai, isliye main Gita Quest content se chhota answer de raha hoon.",
-      deeper: "Aur gehra padhne ke liye neeche Gita Quest aur Vedabase links dekhein.",
+      deeper: "Aur gehra padhne ke liye neeche Gita Quest chapter links dekhein.",
       disclaimer: "Study support ke liye, spiritual authority nahi.",
     };
   }
@@ -457,7 +461,7 @@ function localizedCopy(locale: Locale) {
       "I’m the Gita Quest study helper. Please ask about the Bhagavad Gita, a chapter, meditation, karma, dharma, or applying the teachings in daily life.",
     serviceIssue:
       "The AI service is unavailable right now, so I’m giving a short answer from the available Gita Quest content.",
-    deeper: "For deeper reading, use the Gita Quest and Vedabase links below.",
+    deeper: "For deeper reading, use the Gita Quest chapter links below.",
     disclaimer: "For study support, not spiritual authority.",
   };
 }
