@@ -52,6 +52,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-public-key>
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 GEMINI_API_KEY=<your-gemini-api-key>
 GEMINI_CHAT_MODEL=gemini-3.5-flash
+GEMINI_MAX_OUTPUT_TOKENS=4096
 CHATBOT_ENABLED=true
 ```
 
@@ -148,6 +149,7 @@ Gita Quest includes a floating multilingual Gita helper. It uses Gemini directly
 
 - Requires `GEMINI_API_KEY`.
 - Does not use the local chapter knowledge base for answers.
+- Uses a larger Gemini output budget and asks Gemini to continue automatically if an answer hits the token limit.
 - Returns an error if Gemini is unavailable or `CHATBOT_ENABLED=false`.
 - Does not show Vedabase links or bulk-copy/store Vedabase text.
 - Stores optional chat history only for signed-in users via `user_chat_messages`.

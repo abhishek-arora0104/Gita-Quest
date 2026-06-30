@@ -382,6 +382,7 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 - `POST /api/chat` route using Gemini through server-side `fetch`.
 - No local chapter retrieval for chatbot answers.
 - No source links returned in chatbot responses.
+- Larger Gemini output budget with automatic continuation when Gemini stops due to `MAX_TOKENS`.
 - Guardrails: detailed beginner-friendly answers, no invented exact verse quotes, no pre-attempt quiz answer-key disclosure, no Vedabase links, and study-support disclaimer.
 - Returns an error when Gemini is unavailable, the key is missing, or `CHATBOT_ENABLED=false`.
 - Optional signed-in chat history table via `supabase/migrations/20230101000003_chat_messages.sql`.
@@ -389,6 +390,7 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 **Environment:**
 - `GEMINI_API_KEY`
 - `GEMINI_CHAT_MODEL` (default recommendation: `gemini-3.5-flash`)
+- `GEMINI_MAX_OUTPUT_TOKENS` (default: `4096`)
 - `CHATBOT_ENABLED`
 
 **Policy decision:**

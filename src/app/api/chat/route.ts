@@ -19,6 +19,8 @@ type ChatRequest = {
 const MAX_MESSAGE_LENGTH = 1200;
 const MAX_HISTORY = 8;
 const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash";
+const DEFAULT_GEMINI_OUTPUT_TOKENS = 4096;
+const MAX_CONTINUATIONS = 2;
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as ChatRequest | null;
@@ -44,12 +46,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: copy.missingKey }, { status: 503 });
   }
 
-  const answer = await generateGeminiAnswer({
-    apiKey,
-    locale,
-    message,
-    history,
-  });
+  let answer: string;
+  try {
+    answer = await generateGeminiAnswer({
+      apiKey,
+      locale,
+      message,
+      history,
+    });
+  } catch (error) {
+    console.error("Gemini chatbot request failed", error);
+    return NextResponse.json({ error: copy.serviceIssue }, { status: 502 });
+  }
 
   const user = await getCurrentUser().catch(() => null);
   await saveChatTurn({
@@ -75,6 +83,86 @@ async function generateGeminiAnswer({
 }) {
   const copy = localizedCopy(locale);
   const model = process.env.GEMINI_CHAT_MODEL ?? DEFAULT_GEMINI_MODEL;
+  const maxOutputTokens = getGeminiMaxOutputTokens();
+  const initialPrompt = buildUserPrompt({ message, history });
+  const contents: GeminiContent[] = [
+    {
+      role: "user",
+      parts: [{ text: initialPrompt }],
+    },
+  ];
+  const chunks: string[] = [];
+
+  for (let attempt = 0; attempt <= MAX_CONTINUATIONS; attempt += 1) {
+    const data = await requestGemini({
+      apiKey,
+      model,
+      locale,
+      contents,
+      maxOutputTokens,
+    });
+
+    const candidate = data.candidates?.[0];
+    const text = candidate?.content?.parts
+      ?.map((part) => part.text)
+      .filter(Boolean)
+      .join("\n")
+      .trim();
+
+    if (!text) {
+      throw new Error(copy.serviceIssue);
+    }
+
+    chunks.push(text);
+
+    if (candidate?.finishReason !== "MAX_TOKENS") {
+      break;
+    }
+
+    contents.push({
+      role: "model",
+      parts: [{ text }],
+    });
+    contents.push({
+      role: "user",
+      parts: [
+        {
+          text: "Continue exactly from where you stopped. Do not restart or repeat earlier sections. Finish the answer naturally.",
+        },
+      ],
+    });
+  }
+
+  return appendDisclaimer(chunks.join("\n\n"), locale);
+}
+
+type GeminiContent = {
+  role: "user" | "model";
+  parts: Array<{ text: string }>;
+};
+
+type GeminiResponse = {
+  candidates?: Array<{
+    finishReason?: string;
+    content?: {
+      parts?: Array<{ text?: string }>;
+    };
+  }>;
+};
+
+async function requestGemini({
+  apiKey,
+  model,
+  locale,
+  contents,
+  maxOutputTokens,
+}: {
+  apiKey: string;
+  model: string;
+  locale: Locale;
+  contents: GeminiContent[];
+  maxOutputTokens: number;
+}): Promise<GeminiResponse> {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
@@ -87,14 +175,9 @@ async function generateGeminiAnswer({
         systemInstruction: {
           parts: [{ text: systemPrompt(locale) }],
         },
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: buildUserPrompt({ message, history }) }],
-          },
-        ],
+        contents,
         generationConfig: {
-          maxOutputTokens: 1400,
+          maxOutputTokens,
           temperature: 0.45,
         },
       }),
@@ -103,32 +186,20 @@ async function generateGeminiAnswer({
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    console.error("Gemini chatbot request failed", {
-      status: response.status,
-      detail: detail.slice(0, 500),
-    });
-    throw new Error(copy.serviceIssue);
+    throw new Error(
+      `Gemini API error ${response.status}: ${detail.slice(0, 500)}`,
+    );
   }
 
-  const data = (await response.json()) as {
-    candidates?: Array<{
-      content?: {
-        parts?: Array<{ text?: string }>;
-      };
-    }>;
-  };
+  return (await response.json()) as GeminiResponse;
+}
 
-  const text = data.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text)
-    .filter(Boolean)
-    .join("\n")
-    .trim();
-
-  if (!text) {
-    throw new Error(copy.serviceIssue);
+function getGeminiMaxOutputTokens(): number {
+  const configured = Number(process.env.GEMINI_MAX_OUTPUT_TOKENS);
+  if (!Number.isFinite(configured) || configured <= 0) {
+    return DEFAULT_GEMINI_OUTPUT_TOKENS;
   }
-
-  return appendDisclaimer(text, locale);
+  return Math.min(Math.max(Math.floor(configured), 1024), 8192);
 }
 
 function systemPrompt(locale: Locale): string {

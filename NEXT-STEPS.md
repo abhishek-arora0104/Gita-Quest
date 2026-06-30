@@ -40,6 +40,7 @@
 - Uses Gemini directly for detailed answers.
 - Does not use local chapter retrieval for chatbot answers.
 - Does not show source links.
+- Uses a larger Gemini output budget and automatic continuation for answers cut off by token limits.
 - Does not show Vedabase links or bulk-copy/store Vedabase text.
 - Requires `GEMINI_API_KEY`.
 - Returns an error when Gemini is disabled or unavailable.
@@ -83,6 +84,7 @@ supabase db push
 ```env
 GEMINI_API_KEY=...
 GEMINI_CHAT_MODEL=gemini-3.5-flash
+GEMINI_MAX_OUTPUT_TOKENS=4096
 CHATBOT_ENABLED=true
 ```
 
