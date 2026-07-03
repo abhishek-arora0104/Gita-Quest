@@ -377,7 +377,7 @@ function getChatCopy(locale: Locale) {
   return {
     button: "Gita helper",
     title: "Gita helper",
-    subtitle: "Detailed answers with Gemini",
+      subtitle: "Your Guide To Life",
     welcome:
       "Hare Krishna. Ask about a chapter, quiz idea, meditation, karma, dharma, or applying the Gita in daily life.",
     placeholder: "Ask a Gita question...",
