@@ -122,11 +122,11 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
   }
 
   return (
-    <div className="fixed bottom-5 right-4 z-40 sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-4 left-4 right-4 z-40 flex flex-col items-end sm:left-auto sm:right-6">
       {open && (
         <section
           aria-label={copy.title}
-          className="mb-3 flex h-[34rem] max-h-[calc(100vh-7rem)] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-card border border-gold/30 bg-cream shadow-2xl shadow-maroon/20"
+          className="mb-3 flex h-[80vh] max-h-[34rem] w-full max-w-sm flex-col overflow-hidden rounded-card border border-gold/30 bg-cream shadow-2xl shadow-maroon/20 sm:h-[34rem]"
         >
           <header className="flex items-center justify-between border-b border-gold/20 bg-white/80 px-4 py-3">
             <div>

@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { NavbarClient, NavbarMobileStrip } from "./NavbarClient";
+import { NavbarClient } from "./NavbarClient";
 import { NavbarScrollWrapper } from "./NavbarScrollWrapper";
 import { getDictionary } from "@/lib/i18n/dictionary";
-import { LanguageSwitcher } from "./LanguageSwitcher";
 import type { Locale } from "@/lib/i18n/config";
 
 export async function Navbar({ locale }: { locale: Locale }) {
@@ -23,37 +22,25 @@ export async function Navbar({ locale }: { locale: Locale }) {
         {t.nav.skip}
       </a>
       <NavbarScrollWrapper>
-      <nav
-        className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"
-        aria-label="Primary"
-      >
-        <Link
-          href={`/${locale}`}
-          className="flex items-center gap-2 font-serif text-xl font-semibold text-maroon"
+        <nav
+          className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"
+          aria-label="Primary"
         >
-          <span
-            aria-hidden="true"
-            className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-saffron to-maroon text-base text-cream shadow-sm"
+          <Link
+            href={`/${locale}`}
+            className="flex items-center gap-2 font-serif text-xl font-semibold text-maroon"
           >
-            ॐ
-          </span>
-          <span className="hidden sm:inline">Gita Quest</span>
-        </Link>
+            <span
+              aria-hidden="true"
+              className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-saffron to-maroon text-base text-cream shadow-sm"
+            >
+              ॐ
+            </span>
+            <span>Gita Quest</span>
+          </Link>
 
-        <div className="hidden items-center gap-8 md:flex">
-          <LanguageSwitcher locale={locale} />
-          <NavbarClient locale={locale} navLinks={navLinks} homePath={homePath} showLinks />
-        </div>
-
-        {/* Mobile: auth button only — links live in the bottom strip */}
-        <div className="flex items-center gap-2 md:hidden">
-          <LanguageSwitcher locale={locale} compact />
-          <NavbarClient locale={locale} showLinks={false} />
-        </div>
-      </nav>
-
-      {/* Mobile bottom nav strip — rendered client-side to respect homepage hiding */}
-      <NavbarMobileStrip navLinks={navLinks} homePath={homePath} />
+          <NavbarClient locale={locale} navLinks={navLinks} homePath={homePath} />
+        </nav>
       </NavbarScrollWrapper>
     </>
   );

@@ -1,4 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#7c2d12",
+};
 import { Inter, Cormorant_Garamond, Noto_Serif_Devanagari } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
