@@ -204,6 +204,7 @@ function FormattedMessage({ content }: { content: string }) {
 }
 
 type MarkdownBlock =
+  | { type: "hr" }
   | { type: "heading"; level: number; text: string }
   | { type: "bullet"; text: string }
   | { type: "numbered"; text: string; number: string }
@@ -216,7 +217,13 @@ function parseMarkdownBlocks(content: string): MarkdownBlock[] {
   for (const line of lines) {
     const trimmed = line.trim();
 
-    // Headings: ## Heading
+    // Horizontal rule: --- or ***
+    if (/^(-{3,}|\*{3,})$/.test(trimmed)) {
+      blocks.push({ type: "hr" });
+      continue;
+    }
+
+    // Headings: # Heading
     const headingMatch = trimmed.match(/^(#{1,3})\s+(.*)/);
     if (headingMatch) {
       blocks.push({
@@ -260,11 +267,17 @@ function parseMarkdownBlocks(content: string): MarkdownBlock[] {
 
 function renderBlock(block: MarkdownBlock): ReactNode {
   switch (block.type) {
+    case "hr":
+      return (
+        <span className="block my-2 border-t border-gold/25" />
+      );
     case "heading": {
       const sizeClass =
         block.level === 1
-          ? "text-sm font-bold text-ink mt-3 mb-1"
-          : "text-[13px] font-semibold text-ink mt-2 mb-0.5";
+          ? "text-base font-bold text-ink mt-3 mb-1"
+          : block.level === 2
+            ? "text-[15px] font-semibold text-ink mt-2.5 mb-0.5"
+            : "text-sm font-semibold text-ink mt-2 mb-0.5";
       return (
         <span className={cn("block", sizeClass)}>
           {formatInline(block.text)}
