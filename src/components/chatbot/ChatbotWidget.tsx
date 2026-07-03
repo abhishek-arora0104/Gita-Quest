@@ -182,7 +182,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           : "rounded-bl-sm bg-white text-ink-soft",
       )}
     >
-      <div className="whitespace-pre-wrap">
+      <div>
         <FormattedMessage content={message.content} />
       </div>
     </article>
@@ -190,21 +190,112 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 }
 
 function FormattedMessage({ content }: { content: string }) {
-  const lines = content.split("\n");
+  const blocks = parseMarkdownBlocks(content);
 
   return (
     <>
-      {lines.map((line, index) => (
-        <span key={`${line}-${index}`}>
-          {formatInlineMarkdown(line)}
-          {index < lines.length - 1 ? "\n" : null}
+      {blocks.map((block, index) => (
+        <span key={`${index}-${block.type}`}>
+          {renderBlock(block)}
         </span>
       ))}
     </>
   );
 }
 
-function formatInlineMarkdown(text: string): ReactNode[] {
+type MarkdownBlock =
+  | { type: "heading"; level: number; text: string }
+  | { type: "bullet"; text: string }
+  | { type: "numbered"; text: string; number: string }
+  | { type: "paragraph"; text: string };
+
+function parseMarkdownBlocks(content: string): MarkdownBlock[] {
+  const lines = content.split("\n");
+  const blocks: MarkdownBlock[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Headings: ## Heading
+    const headingMatch = trimmed.match(/^(#{1,3})\s+(.*)/);
+    if (headingMatch) {
+      blocks.push({
+        type: "heading",
+        level: headingMatch[1].length,
+        text: headingMatch[2],
+      });
+      continue;
+    }
+
+    // Numbered list: 1. Item or 1) Item
+    const numberedMatch = trimmed.match(/^(\d+)[.)]\s+(.*)/);
+    if (numberedMatch) {
+      blocks.push({
+        type: "numbered",
+        number: numberedMatch[1],
+        text: numberedMatch[2],
+      });
+      continue;
+    }
+
+    // Bullet list: - Item, * Item, • Item
+    const bulletMatch = trimmed.match(/^[-*•]\s+(.*)/);
+    if (bulletMatch) {
+      blocks.push({ type: "bullet", text: bulletMatch[1] });
+      continue;
+    }
+
+    // Empty lines become empty paragraphs (for spacing)
+    if (trimmed === "") {
+      blocks.push({ type: "paragraph", text: "" });
+      continue;
+    }
+
+    // Regular paragraph
+    blocks.push({ type: "paragraph", text: trimmed });
+  }
+
+  return blocks;
+}
+
+function renderBlock(block: MarkdownBlock): ReactNode {
+  switch (block.type) {
+    case "heading": {
+      const sizeClass =
+        block.level === 1
+          ? "text-sm font-bold text-ink mt-3 mb-1"
+          : "text-[13px] font-semibold text-ink mt-2 mb-0.5";
+      return (
+        <span className={cn("block", sizeClass)}>
+          {formatInline(block.text)}
+        </span>
+      );
+    }
+    case "bullet":
+      return (
+        <span className="block ml-3 pl-2 border-l-2 border-saffron/30 py-0.5">
+          <span className="text-saffron mr-1.5">•</span>
+          {formatInline(block.text)}
+        </span>
+      );
+    case "numbered":
+      return (
+        <span className="block ml-3 pl-2 py-0.5">
+          <span className="text-saffron mr-1 font-semibold">
+            {block.number}.
+          </span>
+          {formatInline(block.text)}
+        </span>
+      );
+    case "paragraph":
+      if (block.text === "") {
+        return <span className="block h-2" />;
+      }
+      return <span className="block">{formatInline(block.text)}</span>;
+  }
+}
+
+function formatInline(text: string): ReactNode[] {
   const parts: ReactNode[] = [];
   const pattern = /(\*\*[^*]+\*\*|\*[^*]+\*)/g;
   let lastIndex = 0;
