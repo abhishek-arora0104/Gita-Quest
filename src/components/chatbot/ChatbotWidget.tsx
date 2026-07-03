@@ -122,35 +122,35 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-40 flex flex-col items-end sm:left-auto sm:right-6">
+    <div className="fixed bottom-3 left-3 right-3 z-40 flex flex-col items-end sm:bottom-6 sm:left-auto sm:right-6">
       {open && (
         <section
           aria-label={copy.title}
-          className="mb-3 flex h-[80vh] max-h-[34rem] w-full max-w-sm flex-col overflow-hidden rounded-card border border-gold/30 bg-cream shadow-2xl shadow-maroon/20 sm:h-[34rem]"
+          className="flex h-[62vh] max-h-[26rem] w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-gold/30 bg-cream shadow-2xl shadow-maroon/20 sm:h-[30rem] sm:max-h-[30rem] sm:w-80"
         >
-          <header className="flex items-center justify-between border-b border-gold/20 bg-white/80 px-4 py-3">
+          <header className="flex items-center justify-between border-b border-gold/20 bg-white/90 px-3.5 py-2.5">
             <div>
-              <h2 className="font-serif text-lg font-bold text-maroon">
+              <h2 className="font-serif text-base font-bold text-maroon">
                 {copy.title}
               </h2>
-              <p className="text-xs text-ink-muted">{copy.subtitle}</p>
+              <p className="text-[11px] text-ink-muted">{copy.subtitle}</p>
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="grid h-9 w-9 place-items-center rounded-full text-ink-muted transition-colors hover:bg-parchment hover:text-ink"
+              className="grid h-8 w-8 place-items-center rounded-full text-base font-bold text-ink-muted transition-colors hover:bg-parchment hover:text-ink"
               aria-label={copy.close}
             >
-              ×
+              ✕
             </button>
           </header>
 
-          <div className="flex-1 space-y-3 overflow-y-auto p-4">
+          <div className="flex-1 space-y-2.5 overflow-y-auto p-3 text-xs sm:text-sm">
             {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}
             {loading && (
-              <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-white px-4 py-3 text-sm text-ink-soft shadow-sm">
+              <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-white px-3.5 py-2.5 text-xs text-ink-soft shadow-sm sm:text-sm">
                 {copy.thinking}
               </div>
             )}
@@ -158,47 +158,47 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
 
           {/* ── Limit reached banners ── */}
           {(dailyLimitReached || globalLimitReached) && !hasOwnKey && (
-            <div className="border-t border-gold/20 bg-amber-50 px-4 py-3">
-              <p className="text-sm font-medium text-maroon">
+            <div className="border-t border-gold/20 bg-amber-50 px-3 py-2 text-xs">
+              <p className="font-medium text-maroon">
                 {dailyLimitReached ? t.limitReached : t.globalLimitReached}
               </p>
-              <p className="mt-1 text-xs text-ink-soft">
+              <p className="mt-0.5 text-[11px] text-ink-soft">
                 {dailyLimitReached ? t.limitBody : t.globalLimitBody}
               </p>
               <Link
                 href={`/${locale}/settings`}
-                className="mt-2 inline-flex items-center gap-1 rounded-full bg-saffron px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-saffron-dark"
+                className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-saffron px-3 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-saffron-dark"
               >
                 ⚙ {t.limitCta}
               </Link>
             </div>
           )}
 
-          <div className="border-t border-gold/20 bg-white/80 p-3">
+          <div className="border-t border-gold/20 bg-white/90 p-2.5">
             {remaining !== null && remaining >= 0 && !hasOwnKey && (
-              <p className="mb-1.5 text-xs text-ink-muted">
+              <p className="mb-1 text-[11px] text-ink-muted">
                 {remaining}/3 {t.remaining}
               </p>
             )}
             {hasOwnKey && (
-              <p className="mb-1.5 text-xs text-leaf">✓ {t.unlimited}</p>
+              <p className="mb-1 text-[11px] text-leaf">✓ {t.unlimited}</p>
             )}
-            {error && <p className="mb-2 text-xs text-red-600">{error}</p>}
+            {error && <p className="mb-1.5 text-[11px] text-red-600">{error}</p>}
             <div className="flex gap-2">
               <textarea
                 ref={inputRef}
-                rows={2}
+                rows={1}
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={copy.placeholder}
-                className="min-h-12 flex-1 resize-none rounded-2xl border border-gold/30 bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-saffron"
+                className="min-h-10 flex-1 resize-none rounded-xl border border-gold/30 bg-white px-3 py-2 text-xs text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-saffron sm:text-sm"
               />
               <button
                 type="button"
                 onClick={() => void sendMessage()}
                 disabled={loading || input.trim().length === 0}
-                className="h-12 rounded-full bg-saffron px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-saffron-dark disabled:pointer-events-none disabled:opacity-50"
+                className="h-10 rounded-xl bg-saffron px-3.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-saffron-dark disabled:pointer-events-none disabled:opacity-50 sm:text-sm"
               >
                 {copy.send}
               </button>
@@ -207,18 +207,20 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
         </section>
       )}
 
-      <button
-        type="button"
-        onClick={() => {
-          setOpen((value) => !value);
-          window.setTimeout(() => inputRef.current?.focus(), 50);
-        }}
-        className="flex h-14 items-center gap-2 rounded-full bg-maroon px-5 text-sm font-semibold text-cream shadow-lg shadow-maroon/25 transition-transform hover:-translate-y-0.5 hover:bg-maroon-dark"
-        aria-expanded={open}
-      >
-        <span aria-hidden="true">☸</span>
-        {copy.button}
-      </button>
+      {!open && (
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(true);
+            window.setTimeout(() => inputRef.current?.focus(), 50);
+          }}
+          className="flex h-12 items-center gap-2 rounded-full bg-maroon px-4 text-xs font-semibold text-cream shadow-lg shadow-maroon/25 transition-transform hover:-translate-y-0.5 hover:bg-maroon-dark sm:h-14 sm:px-5 sm:text-sm"
+          aria-expanded={false}
+        >
+          <span aria-hidden="true">☸</span>
+          {copy.button}
+        </button>
+      )}
     </div>
   );
 }
