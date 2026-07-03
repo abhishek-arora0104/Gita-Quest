@@ -48,15 +48,15 @@ export function HomeClient({ locale }: { locale: Locale }) {
             </p>
           </ScrollReveal>
           <ScrollReveal delay={300}>
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button href={`/${locale}/auth/signup`} size="lg" className="w-full sm:w-auto">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button href={`/${locale}/auth/signup`} size="md" className="px-6 py-2.5 sm:px-7 sm:py-3 text-sm sm:text-base font-semibold">
                 {t.home.startLearning}
               </Button>
               <Button
                 href={`/${locale}/chapters`}
-                size="lg"
+                size="md"
                 variant="outline"
-                className="w-full sm:w-auto"
+                className="px-6 py-2.5 sm:px-7 sm:py-3 text-sm sm:text-base font-semibold"
               >
                 {t.home.viewChapters}
               </Button>
