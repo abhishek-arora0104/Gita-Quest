@@ -133,7 +133,7 @@ async function generateGeminiAnswer({
     });
   }
 
-  return appendDisclaimer(chunks.join("\n\n"), locale);
+  return chunks.join("\n\n");
 }
 
 type GeminiContent = {
@@ -254,11 +254,6 @@ function sanitizeHistory(history: ChatRequest["history"]): ChatMessage[] {
     }));
 }
 
-function appendDisclaimer(text: string, locale: Locale): string {
-  const disclaimer = localizedCopy(locale).disclaimer;
-  return text.includes(disclaimer) ? text : `${text}\n\n${disclaimer}`;
-}
-
 async function saveChatTurn({
   userId,
   locale,
@@ -302,7 +297,6 @@ function localizedCopy(locale: Locale) {
       disabled: "Chatbot अभी बंद है।",
       missingKey: "Gemini API key सेट नहीं है।",
       serviceIssue: "Gemini से उत्तर नहीं मिल पाया। कृपया थोड़ी देर बाद फिर कोशिश करें।",
-      disclaimer: "अध्ययन सहायता के लिए, आध्यात्मिक अधिकार नहीं।",
     };
   }
   if (locale === "hinglish") {
@@ -312,7 +306,6 @@ function localizedCopy(locale: Locale) {
       disabled: "Chatbot abhi band hai.",
       missingKey: "Gemini API key set nahi hai.",
       serviceIssue: "Gemini se answer nahi mil paya. Kripya thodi der baad try karein.",
-      disclaimer: "Study support ke liye, spiritual authority nahi.",
     };
   }
   return {
@@ -321,6 +314,5 @@ function localizedCopy(locale: Locale) {
     disabled: "The chatbot is currently disabled.",
     missingKey: "Gemini API key is not configured.",
     serviceIssue: "Gemini could not answer right now. Please try again shortly.",
-    disclaimer: "For study support, not spiritual authority.",
   };
 }

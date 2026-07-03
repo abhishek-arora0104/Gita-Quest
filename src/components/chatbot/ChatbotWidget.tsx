@@ -150,9 +150,6 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
                 {copy.send}
               </button>
             </div>
-            <p className="mt-2 text-[0.68rem] leading-relaxed text-ink-muted">
-              {copy.disclaimer}
-            </p>
           </div>
         </section>
       )}
@@ -257,7 +254,6 @@ function getChatCopy(locale: Locale) {
       thinking: "सोच रहा हूँ...",
       close: "चैट बंद करें",
       error: "अभी उत्तर नहीं मिल पाया। कृपया फिर कोशिश करें।",
-      disclaimer: "अध्ययन सहायता के लिए, आध्यात्मिक अधिकार नहीं।",
     };
   }
   if (locale === "hinglish") {
@@ -272,7 +268,6 @@ function getChatCopy(locale: Locale) {
       thinking: "Soch raha hoon...",
       close: "Chat band karein",
       error: "Abhi answer nahi mil paya. Kripya phir try karein.",
-      disclaimer: "Study support ke liye, spiritual authority nahi.",
     };
   }
   return {
@@ -286,6 +281,5 @@ function getChatCopy(locale: Locale) {
     thinking: "Thinking...",
     close: "Close chat",
     error: "I could not answer right now. Please try again.",
-    disclaimer: "For study support, not spiritual authority.",
   };
 }

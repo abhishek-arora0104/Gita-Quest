@@ -383,7 +383,7 @@ All tables: RLS owner-only. Profile auto-created via trigger on `auth.users`.
 - No local chapter retrieval for chatbot answers.
 - No source links returned in chatbot responses.
 - Larger Gemini output budget with automatic continuation when Gemini stops due to `MAX_TOKENS`.
-- Guardrails: detailed beginner-friendly answers, no invented exact verse quotes, no pre-attempt quiz answer-key disclosure, no Vedabase links, and study-support disclaimer.
+- Guardrails: detailed beginner-friendly answers, no invented exact verse quotes, no pre-attempt quiz answer-key disclosure, and no Vedabase links.
 - Returns an error when Gemini is unavailable, the key is missing, or `CHATBOT_ENABLED=false`.
 - Optional signed-in chat history table via `supabase/migrations/20230101000003_chat_messages.sql`.
 
