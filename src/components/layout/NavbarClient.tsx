@@ -71,18 +71,28 @@ export function NavbarClient({
           {t.nav.login}
         </Link>
       ) : (
-        <Link
-          href={`/${locale}/dashboard`}
-          className="flex items-center gap-2 rounded-full bg-saffron px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-saffron-dark"
-        >
-          <span
-            aria-hidden="true"
-            className="grid h-5 w-5 place-items-center rounded-full bg-white/20 text-xs font-bold text-white"
+        <>
+          <Link
+            href={`/${locale}/dashboard`}
+            className="flex items-center gap-2 rounded-full bg-saffron px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-saffron-dark"
           >
-            {(user.email ?? "U").charAt(0).toUpperCase()}
-          </span>
-          {t.nav.dashboard}
-        </Link>
+            <span
+              aria-hidden="true"
+              className="grid h-5 w-5 place-items-center rounded-full bg-white/20 text-xs font-bold text-white"
+            >
+              {(user.email ?? "U").charAt(0).toUpperCase()}
+            </span>
+            {t.nav.dashboard}
+          </Link>
+          <Link
+            href={`/${locale}/settings`}
+            className="grid h-9 w-9 place-items-center rounded-full border border-gold/30 bg-white/80 text-ink-muted transition-colors hover:border-saffron hover:text-saffron"
+            aria-label={t.nav.settings}
+            title={t.nav.settings}
+          >
+            ⚙
+          </Link>
+        </>
       )}
     </div>
   );

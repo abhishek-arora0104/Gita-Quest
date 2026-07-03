@@ -10,6 +10,7 @@ export const dictionaries = {
       startLearning: "Start Learning",
       getStarted: "Explore Chapters",
       dashboard: "Dashboard",
+      settings: "Settings",
       skip: "Skip to main content",
     },
     footer: {
@@ -231,6 +232,7 @@ export const dictionaries = {
       maxLevel: "Max level reached!",
       toNextLevel: "XP to next level",
       xpToNext: "XP to next level",
+      metaDescription: "Track your Gita Quest progress, XP, level, badges, and streak.",
     },
     reflection: {
       label: "Your reflection (optional)",
@@ -298,6 +300,54 @@ export const dictionaries = {
       "gita-master": { name: "Gita Master", description: "Reach level 10 (Gita Master)." },
       lockedSuffix: "(locked)",
     },
+    chatbot: {
+      limitReached: "You've used all 3 free questions for today.",
+      limitBody: "To ask more questions, add your own Gemini API key. It's free to get one!",
+      limitCta: "Go to Settings to add your API key",
+      limitCtaLogin: "Log in to add your API key",
+      remaining: "free questions left today",
+      unlimited: "Unlimited questions with your own API key",
+    },
+    settings: {
+      title: "Settings",
+      subtitle: "Manage your account and chatbot preferences.",
+      apiKeyTitle: "Gemini API Key",
+      apiKeySubtitle:
+        "Add your own Gemini API key to get unlimited chatbot questions. Without a key, you get 3 free questions per day.",
+      apiKeyLabel: "Your Gemini API Key",
+      apiKeyPlaceholder: "Paste your API key here...",
+      saveKey: "Save API Key",
+      saving: "Saving...",
+      saved: "API key saved! You now have unlimited chatbot access.",
+      removeKey: "Remove API Key",
+      removeConfirm: "Are you sure? You'll go back to 3 free questions per day.",
+      removed: "API key removed. You have 3 free questions per day.",
+      notAuthenticated: "Please log in to manage your settings.",
+      loginCta: "Log in",
+      errorSaving: "Could not save the API key. Please check the format and try again.",
+      errorRemoving: "Could not remove the API key. Please try again.",
+      // ── Guide section ──
+      guideTitle: "How to Get Your Free Gemini API Key",
+      guideSubtitle:
+        "Follow these simple steps to get your own key. It takes about 2 minutes and it's completely free!",
+      guideStep1Title: "Step 1: Create a Google Account",
+      guideStep1Body:
+        "If you already have a Gmail or Google account, skip to Step 2. If not, go to google.com and click \"Create account\" in the top-right corner. Fill in your name, choose a username (like yourname@gmail.com), and set a password. You'll need to verify with a phone number.",
+      guideStep2Title: "Step 2: Go to Google AI Studio",
+      guideStep2Body:
+        "Open your web browser and go to aistudio.google.com. Sign in with your Google account if asked.",
+      guideStep3Title: "Step 3: Generate Your API Key",
+      guideStep3Body:
+        "On the Google AI Studio page, look at the left sidebar. Click on \"Get API key\" (or click the three dots / menu icon if you don't see it). Then click \"Create API key\". Choose an existing Google Cloud project or let Google create one for you (this is free).",
+      guideStep4Title: "Step 4: Copy Your Key",
+      guideStep4Body:
+        "After clicking create, you'll see a long string of letters and numbers — that's your API key! Click the \"Copy\" button next to it. Your key will look something like: AIzaSyA1B2C3D4E5F6G7H8I9J0...",
+      guideStep5Title: "Step 5: Paste It Here",
+      guideStep5Body:
+        "Come back to this Settings page and paste the key in the box above. Click \"Save API Key\" and you're done! You now have unlimited chatbot questions.",
+      guideNote: "Your API key is stored securely in your account. It is never shared with anyone else. If you ever want to remove it, just click the \"Remove API Key\" button above.",
+      cancel: "Cancel",
+    },
   },
   hi: {
     nav: {
@@ -307,6 +357,7 @@ export const dictionaries = {
       startLearning: "सीखना शुरू करें",
       getStarted: "अध्याय देखें",
       dashboard: "डैशबोर्ड",
+      settings: "सेटिंग्स",
       skip: "मुख्य सामग्री पर जाएं",
     },
     footer: {
@@ -523,6 +574,7 @@ export const dictionaries = {
       maxLevel: "अधिकतम स्तर मिल गया!",
       toNextLevel: "XP अगले स्तर तक",
       xpToNext: "XP अगले स्तर तक",
+      metaDescription: "अपनी Gita Quest प्रगति, XP, स्तर, बैज और स्ट्रीक ट्रैक करें।",
     },
     reflection: {
       label: "आपका मनन (वैकल्पिक)",
@@ -587,6 +639,53 @@ export const dictionaries = {
       "gita-scholar": { name: "गीता विद्वान", description: "स्तर 8 (गीता विद्वान) तक पहुंचें।" },
       "gita-master": { name: "गीता महारथी", description: "स्तर 10 (गीता महारथी) तक पहुंचें।" },
       lockedSuffix: "(बंद)",
+    },
+    chatbot: {
+      limitReached: "आज की 3 मुफ्त पूछताछ खत्म हो गईं।",
+      limitBody: "ज़्यादा पूछने के लिए अपनी Gemini API key जोड़ें। यह मुफ्त है!",
+      limitCta: "API key जोड़ने के लिए Settings पर जाएं",
+      limitCtaLogin: "API key जोड़ने के लिए लॉग इन करें",
+      remaining: "आज की बची मुफ्त पूछताछ",
+      unlimited: "अपनी API key से असीमित पूछताछ",
+    },
+    settings: {
+      title: "सेटिंग्स",
+      subtitle: "अपने खाते और चैटबॉट प्राथमिकताएं प्रबंधित करें।",
+      apiKeyTitle: "Gemini API Key",
+      apiKeySubtitle:
+        "असीमित चैटबॉट प्रश्नों के लिए अपनी Gemini API key जोड़ें। बिना key के आपको रोज़ 3 मुफ्त प्रश्न मिलते हैं।",
+      apiKeyLabel: "आपकी Gemini API Key",
+      apiKeyPlaceholder: "यहाँ अपनी API key पेस्ट करें...",
+      saveKey: "API Key सहेजें",
+      saving: "सहेज रहे हैं...",
+      saved: "API key सहेज गई! अब आपके पास असीमित चैटबॉट एक्सेस है।",
+      removeKey: "API Key हटाएं",
+      removeConfirm: "क्या आप सुनिश्चित हैं? आप वापस रोज़ 3 मुफ्त प्रश्नों पर आएंगे।",
+      removed: "API key हटा दी गई। आपको रोज़ 3 मुफ्त प्रश्न मिलते हैं।",
+      notAuthenticated: "सेटिंग्स प्रबंधित करने के लिए कृपया लॉग इन करें।",
+      loginCta: "लॉग इन",
+      errorSaving: "API key सहेज नहीं पाए। कृपया फॉर्मेट जांचें और फिर कोशिश करें।",
+      errorRemoving: "API key हटा नहीं पाए। कृपया फिर कोशिश करें।",
+      guideTitle: "अपनी मुफ्त Gemini API Key कैसे पाएं",
+      guideSubtitle:
+        "अपनी key पाने के लिए इन आसान चरणों का पालन करें। इसमें लगभग 2 मिनट लगते हैं और यह पूरी तरह मुफ्त है!",
+      guideStep1Title: "चरण 1: Google खाता बनाएं",
+      guideStep1Body:
+        "अगर आपके पास पहले से Gmail या Google खाता है, तो चरण 2 पर जाएं। नहीं तो google.com पर जाएं और दाईं ओर \"Create account\" पर क्लिक करें। अपना नाम भरें, एक यूज़रनेम चुनें, और पासवर्ड सेट करें।",
+      guideStep2Title: "चरण 2: Google AI Studio पर जाएं",
+      guideStep2Body:
+        "अपना वेब ब्राउज़र खोलें और aistudio.google.com पर जाएं। माँगे जाने पर अपने Google खाते से साइन इन करें।",
+      guideStep3Title: "चरण 3: अपनी API Key बनाएं",
+      guideStep3Body:
+        "Google AI Studio पेज पर बाईं ओर देखें। \"Get API key\" पर क्लिक करें। फिर \"Create API key\" पर क्लिक करें। कोई मौजूदा Google Cloud प्रोजेक्ट चुनें या Google को एक बनाने दें (यह मुफ्त है)।",
+      guideStep4Title: "चरण 4: अपनी Key कॉपी करें",
+      guideStep4Body:
+        "क्रिएट करने के बाद आपको अक्षरों और संख्याओं की एक लंबी स्ट्रिंग दिखेगी — वह आपकी API key है! उसके बगल में \"Copy\" बटन पर क्लिक करें।",
+      guideStep5Title: "चरण 5: यहाँ पेस्ट करें",
+      guideStep5Body:
+        "इस Settings पेज पर वापस आएं और key को ऊपर बॉक्स में पेस्ट करें। \"API Key सहेजें\" पर क्लिक करें और आपका काम हो गया! अब आपके पास असीमित चैटबॉट प्रश्न हैं।",
+      guideNote: "आपकी API key सुरक्षित रूप से आपके खाते में संग्रहीत है। यह किसी के साथ साझा नहीं की जाती। हटाने के लिए बस \"API Key हटाएं\" बटन दबाएं।",
+      cancel: "रद्द करें",
     },
   },
   hinglish: hinglishDictionary,

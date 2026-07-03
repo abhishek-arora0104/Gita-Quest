@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import type { Locale } from "@/lib/i18n/config";
@@ -16,6 +17,7 @@ const MAX_HISTORY_FOR_API = 8;
 
 export function ChatbotWidget({ locale }: { locale: Locale }) {
   const copy = getChatCopy(locale);
+  const t = importChatbotT(locale);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
@@ -27,6 +29,10 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dailyLimitReached, setDailyLimitReached] = useState(false);
+  const [globalLimitReached, setGlobalLimitReached] = useState(false);
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [hasOwnKey, setHasOwnKey] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   const apiHistory = useMemo(
@@ -65,12 +71,33 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
       const data = (await response.json()) as {
         answer?: string;
         error?: string;
+        dailyLimitReached?: boolean;
+        globalLimitReached?: boolean;
+        hasOwnKey?: boolean;
+        remaining?: number;
       };
 
       if (!response.ok || !data.answer) {
+        if (data.dailyLimitReached) {
+          setDailyLimitReached(true);
+          throw new Error(data.error ?? t.limitReached);
+        }
+        if (data.globalLimitReached) {
+          setGlobalLimitReached(true);
+          throw new Error(data.error ?? t.globalLimitReached);
+        }
         throw new Error(data.error ?? copy.error);
       }
       const answer = data.answer;
+
+      if (typeof data.remaining === "number") {
+        setRemaining(data.remaining);
+      }
+      if (data.hasOwnKey) {
+        setHasOwnKey(true);
+        setDailyLimitReached(false);
+        setGlobalLimitReached(false);
+      }
 
       setMessages((prev) => [
         ...prev,
@@ -129,7 +156,33 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
             )}
           </div>
 
+          {/* ── Limit reached banners ── */}
+          {(dailyLimitReached || globalLimitReached) && !hasOwnKey && (
+            <div className="border-t border-gold/20 bg-amber-50 px-4 py-3">
+              <p className="text-sm font-medium text-maroon">
+                {dailyLimitReached ? t.limitReached : t.globalLimitReached}
+              </p>
+              <p className="mt-1 text-xs text-ink-soft">
+                {dailyLimitReached ? t.limitBody : t.globalLimitBody}
+              </p>
+              <Link
+                href={`/${locale}/settings`}
+                className="mt-2 inline-flex items-center gap-1 rounded-full bg-saffron px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-saffron-dark"
+              >
+                ⚙ {t.limitCta}
+              </Link>
+            </div>
+          )}
+
           <div className="border-t border-gold/20 bg-white/80 p-3">
+            {remaining !== null && remaining >= 0 && !hasOwnKey && (
+              <p className="mb-1.5 text-xs text-ink-muted">
+                {remaining}/3 {t.remaining}
+              </p>
+            )}
+            {hasOwnKey && (
+              <p className="mb-1.5 text-xs text-leaf">✓ {t.unlimited}</p>
+            )}
             {error && <p className="mb-2 text-xs text-red-600">{error}</p>}
             <div className="flex gap-2">
               <textarea
@@ -348,8 +401,8 @@ function formatInline(text: string): ReactNode[] {
 function getChatCopy(locale: Locale) {
   if (locale === "hi") {
     return {
-      button: "Gita सहायक",
-      title: "Gita सहायक",
+      button: "Gita Helper",
+      title: "Gita Helper",
       subtitle: "Gemini से विस्तृत उत्तर",
       welcome:
         "हरे कृष्ण। Bhagavad Gita, किसी अध्याय, quiz, meditation, karma, या daily life application पर प्रश्न पूछें।",
@@ -362,8 +415,8 @@ function getChatCopy(locale: Locale) {
   }
   if (locale === "hinglish") {
     return {
-      button: "Gita helper",
-      title: "Gita helper",
+      button: "Gita Helper",
+      title: "Gita Helper",
       subtitle: "Gemini se detailed jawab",
       welcome:
         "Hare Krishna. Bhagavad Gita, kisi chapter, quiz, meditation, karma, ya daily life application par sawaal poochhein.",
@@ -375,9 +428,9 @@ function getChatCopy(locale: Locale) {
     };
   }
   return {
-    button: "Gita helper",
-    title: "Gita helper",
-      subtitle: "Your Guide To Life",
+    button: "Gita Helper",
+    title: "Gita Helper",
+    subtitle: "Your Guide To Life",
     welcome:
       "Hare Krishna. Ask about a chapter, quiz idea, meditation, karma, dharma, or applying the Gita in daily life.",
     placeholder: "Ask a Gita question...",
@@ -386,4 +439,47 @@ function getChatCopy(locale: Locale) {
     close: "Close chat",
     error: "I could not answer right now. Please try again.",
   };
+}
+
+type ChatbotT = {
+  limitReached: string;
+  limitBody: string;
+  limitCta: string;
+  remaining: string;
+  unlimited: string;
+  globalLimitReached: string;
+  globalLimitBody: string;
+};
+
+function importChatbotT(locale: Locale): ChatbotT {
+  const dict = {
+    en: {
+      limitReached: "You've used all 3 free questions for today.",
+      limitBody: "To ask more questions, add your own Gemini API key. It's free to get one!",
+      limitCta: "Go to Settings to add your API key",
+      remaining: "free questions left today",
+      unlimited: "Unlimited questions with your own API key",
+      globalLimitReached: "The app's global API limit has been reached.",
+      globalLimitBody: "Lots of people are asking questions! To skip the wait and continue right now, please add your own free Gemini API key.",
+    },
+    hi: {
+      limitReached: "आज की 3 मुफ्त पूछताछ खत्म हो गईं।",
+      limitBody: "ज़्यादा पूछने के लिए अपनी Gemini API key जोड़ें। यह मुफ्त है!",
+      limitCta: "API key जोड़ने के लिए Settings पर जाएं",
+      remaining: "आज की बची मुफ्त पूछताछ",
+      unlimited: "अपनी API key से असीमित पूछताछ",
+      globalLimitReached: "ऐप की ग्लोबल API लिमिट खत्म हो गई है।",
+      globalLimitBody: "बहुत सारे लोग प्रश्न पूछ रहे हैं! अभी जारी रखने के लिए कृपया अपनी मुफ्त Gemini API key जोड़ें।",
+    },
+    hinglish: {
+      limitReached: "Aaj ki 3 free questions khatam ho gayi.",
+      limitBody: "Zyada poochhne ke liye apni Gemini API key add karein. Yeh free hai!",
+      limitCta: "API key add karne ke liye Settings par jayein",
+      remaining: "aaj ki baaki free questions",
+      unlimited: "Apni API key se unlimited questions",
+      globalLimitReached: "App ki global API limit khatam ho gayi hai.",
+      globalLimitBody: "Bahut saare log questions poochh rahe hain! Abhi continue karne ke liye kripya apni free Gemini API key add karein.",
+    },
+  };
+  return dict[locale];
 }

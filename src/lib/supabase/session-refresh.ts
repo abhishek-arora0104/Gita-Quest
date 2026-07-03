@@ -7,7 +7,7 @@ import {
 } from "@/lib/i18n/config";
 
 /** Routes that require authentication — unauthenticated users are bounced to login. */
-const PROTECTED_ROUTES = ["/dashboard"];
+const PROTECTED_ROUTES = ["/dashboard", "/settings"];
 
 /** Routes only for guests — authenticated users are bounced to dashboard. */
 const AUTH_ROUTES = ["/auth/login", "/auth/signup"];

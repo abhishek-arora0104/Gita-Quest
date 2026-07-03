@@ -14,6 +14,7 @@ export const hinglishDictionary = {
     startLearning: "Seekhna shuru karein",
     getStarted: "Chapter dekhein",
     dashboard: "Dashboard",
+    settings: "Settings",
     skip: "Mukhya bhag par jayein",
   },
   footer: {
@@ -246,6 +247,7 @@ export const hinglishDictionary = {
     maxLevel: "Max level mil gaya!",
     toNextLevel: "XP agle level tak",
     xpToNext: "XP agle level tak",
+    metaDescription: "Apni Gita Quest progress, XP, level, badges, aur streak track karein.",
   },
   reflection: {
     label: "Aapka reflection (vikalpik)",
@@ -314,5 +316,52 @@ export const hinglishDictionary = {
     "gita-scholar": { name: "Gita Vidwan", description: "Level 8 (Gita Vidwan) tak pahunchein." },
     "gita-master": { name: "Gita Maharathi", description: "Level 10 (Gita Maharathi) tak pahunchein." },
     lockedSuffix: "(band)",
+  },
+  chatbot: {
+    limitReached: "Aaj ki 3 free questions khatam ho gayi.",
+    limitBody: "Zyada poochhne ke liye apni Gemini API key add karein. Yeh free hai!",
+    limitCta: "API key add karne ke liye Settings par jayein",
+    limitCtaLogin: "API key add karne ke liye login karein",
+    remaining: "aaj ki baaki free questions",
+    unlimited: "Apni API key se unlimited questions",
+  },
+  settings: {
+    title: "Settings",
+    subtitle: "Apna account aur chatbot preferences manage karein.",
+    apiKeyTitle: "Gemini API Key",
+    apiKeySubtitle:
+      "Unlimited chatbot questions ke liye apni Gemini API key add karein. Bina key ke aapko roz 3 free questions milte hain.",
+    apiKeyLabel: "Aapki Gemini API Key",
+    apiKeyPlaceholder: "Yahan apni API key paste karein...",
+    saveKey: "API Key Save Karein",
+    saving: "Save ho raha hai...",
+    saved: "API key save ho gayi! Ab aapke paas unlimited chatbot access hai.",
+    removeKey: "API Key Hataayein",
+    removeConfirm: "Kya aap sure hain? Aap wapas roz 3 free questions par aa jaayenge.",
+    removed: "API key hata di gayi. Aapko roz 3 free questions milte hain.",
+    notAuthenticated: "Settings manage karne ke liye kripya login karein.",
+    loginCta: "Login karein",
+    errorSaving: "API key save nahi ho payi. Kripya format check karein aur dobara try karein.",
+    errorRemoving: "API key hata nahi paaye. Kripya dobara try karein.",
+    guideTitle: "Apni Free Gemini API Key Kaise Paayein",
+    guideSubtitle:
+      "Apni key paane ke liye in simple steps follow karein. Isme lagbhag 2 minute lagte hain aur yeh bilkul free hai!",
+    guideStep1Title: "Step 1: Google Account Banayein",
+    guideStep1Body:
+      "Agar aapke paas pehle se Gmail ya Google account hai, toh Step 2 par jayein. Nahi toh google.com par jayein aur top-right corner mein \"Create account\" par click karein. Apna naam bharlein, ek username chunein, aur password set karein.",
+    guideStep2Title: "Step 2: Google AI Studio Par Jayein",
+    guideStep2Body:
+      "Apna web browser khollein aur aistudio.google.com par jayein. Maangne par apne Google account se sign in karein.",
+    guideStep3Title: "Step 3: Apni API Key Banayein",
+    guideStep3Body:
+      "Google AI Studio page par left sidebar mein dekhein. \"Get API key\" par click karein. Phir \"Create API key\" par click karein. Koi existing Google Cloud project chunein ya Google ko ek banane dein (yeh free hai).",
+    guideStep4Title: "Step 4: Apni Key Copy Karein",
+    guideStep4Body:
+      "Create karne ke baad aapko ek long string dikhegi — wohi aapki API key hai! Uske paas \"Copy\" button par click karein.",
+    guideStep5Title: "Step 5: Yahan Paste Karein",
+    guideStep5Body:
+      "Is Settings page par wapas aayein aur key ko upar box mein paste karein. \"API Key Save Karein\" par click karein aur ho gaya! Ab aapke paas unlimited chatbot questions hain.",
+    guideNote: "Aapki API key securely aapke account mein store hoti hai. Yeh kisi ke saath share nahi hoti. Hataane ke liye bas \"API Key Hataayein\" button dabaayein.",
+    cancel: "Cancel",
   },
 } as const;

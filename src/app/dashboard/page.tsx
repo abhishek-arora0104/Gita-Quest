@@ -14,9 +14,11 @@ import { getRequestLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const t = getDictionary(locale);
   return {
-    title: "Dashboard",
-    description: "Track your Gita Quest progress, XP, level, badges, and streak.",
+    title: t.nav.dashboard,
+    description: t.dashboard.metaDescription,
   };
 }
 

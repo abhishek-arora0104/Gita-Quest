@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { isLocale, type Locale } from "@/lib/i18n/config";
@@ -21,6 +22,7 @@ const MAX_HISTORY = 8;
 const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash";
 const DEFAULT_GEMINI_OUTPUT_TOKENS = 4096;
 const MAX_CONTINUATIONS = 2;
+const FREE_DAILY_LIMIT = 3;
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as ChatRequest | null;
@@ -41,7 +43,46 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: copy.disabled }, { status: 503 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  // ── Determine API key: prefer user's key, fall back to app key ──
+  const user = await getCurrentUser().catch(() => null);
+  const userApiKey = user ? await fetchUserGeminiKey(user.id) : null;
+  const hasOwnKey = !!userApiKey;
+
+  // ── Track daily usage via cookies + DB fallback ──
+  const today = new Date().toISOString().slice(0, 10);
+  const cookieStore = await cookies();
+  const usageCookie = cookieStore.get("gita_daily_chat")?.value;
+
+  let currentUsed = 0;
+  if (usageCookie) {
+    const [cookieDate, cookieCount] = usageCookie.split(":");
+    if (cookieDate === today) {
+      currentUsed = parseInt(cookieCount, 10) || 0;
+    }
+  }
+
+  if (user) {
+    const dbCount = await countUserPromptsToday(user.id, today);
+    currentUsed = Math.max(currentUsed, dbCount);
+  }
+
+  // ── Rate limit: enforce only when using the shared app key ──
+  if (!hasOwnKey && currentUsed >= FREE_DAILY_LIMIT) {
+    return NextResponse.json(
+      {
+        error: copy.dailyLimit,
+        dailyLimitReached: true,
+        promptCount: currentUsed,
+        dailyLimit: FREE_DAILY_LIMIT,
+      },
+      { status: 429 },
+    );
+  }
+
+  const apiKey = hasOwnKey
+    ? userApiKey!
+    : process.env.GEMINI_API_KEY;
+
   if (!apiKey) {
     return NextResponse.json({ error: copy.missingKey }, { status: 503 });
   }
@@ -56,10 +97,15 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Gemini chatbot request failed", error);
+    if (error instanceof Error && error.message.includes("429")) {
+      return NextResponse.json({ 
+        error: copy.dailyLimit, 
+        globalLimitReached: true 
+      }, { status: 429 });
+    }
     return NextResponse.json({ error: copy.serviceIssue }, { status: 502 });
   }
 
-  const user = await getCurrentUser().catch(() => null);
   await saveChatTurn({
     userId: user?.id,
     locale,
@@ -67,7 +113,26 @@ export async function POST(request: Request) {
     answer,
   });
 
-  return NextResponse.json({ answer, sources: [], provider: "gemini" });
+  // ── Update usage cookie and compute remaining ──
+  const newUsed = currentUsed + 1;
+  if (!hasOwnKey) {
+    cookieStore.set("gita_daily_chat", `${today}:${newUsed}`, {
+      path: "/",
+      maxAge: 86400 * 2,
+      httpOnly: true,
+      sameSite: "lax",
+    });
+  }
+
+  const remaining = hasOwnKey ? -1 : Math.max(FREE_DAILY_LIMIT - newUsed, 0);
+
+  return NextResponse.json({
+    answer,
+    sources: [],
+    provider: "gemini",
+    hasOwnKey,
+    remaining,
+  });
 }
 
 async function generateGeminiAnswer({
@@ -220,8 +285,10 @@ function systemPrompt(locale: Locale): string {
     "For verse requests, you may summarize all verses in a chapter, but do not reproduce long copyrighted translations in full.",
     "Do not mention or link Vedabase.",
     "Do not invent exact verse quotations. If unsure about exact wording, summarize instead.",
+    "If you quote or mention a specific Bhagavad Gita verse, you MUST include the original Sanskrit sloka in Devanagari, followed by its Roman transliteration (IAST format), and then its translation.",
     "Do not reveal quiz answer keys before a user has attempted a quiz.",
     "End with a brief, practical takeaway that a kid can apply in their daily life — like a small challenge, a thought to try, or a fun tip.",
+    "Do NOT always end your response with a question. Only ask a question if it is highly relevant and encourages meaningful reflection.",
   ].join("\n");
 }
 
@@ -290,6 +357,38 @@ async function saveChatTurn({
   }
 }
 
+async function fetchUserGeminiKey(userId: string): Promise<string | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("profiles")
+      .select("gemini_api_key")
+      .eq("id", userId)
+      .single();
+    return data?.gemini_api_key ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function countUserPromptsToday(
+  userId: string,
+  todayStart: string,
+): Promise<number> {
+  try {
+    const supabase = await createClient();
+    const { count } = await supabase
+      .from("user_chat_messages")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("role", "user")
+      .gte("created_at", `${todayStart}T00:00:00+00:00`);
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
 function localizedCopy(locale: Locale) {
   if (locale === "hi") {
     return {
@@ -298,6 +397,8 @@ function localizedCopy(locale: Locale) {
       disabled: "Chatbot अभी बंद है।",
       missingKey: "Gemini API key सेट नहीं है।",
       serviceIssue: "Gemini से उत्तर नहीं मिल पाया। कृपया थोड़ी देर बाद फिर कोशिश करें।",
+      dailyLimit:
+        "आज की 3 मुफ्त पूछताछ खत्म हो गईं। ज़्यादा पूछने के लिए अपनी Gemini API key Settings में जोड़ें।",
     };
   }
   if (locale === "hinglish") {
@@ -307,6 +408,8 @@ function localizedCopy(locale: Locale) {
       disabled: "Chatbot abhi band hai.",
       missingKey: "Gemini API key set nahi hai.",
       serviceIssue: "Gemini se answer nahi mil paya. Kripya thodi der baad try karein.",
+      dailyLimit:
+        "Aaj ki 3 free questions khatam ho gayi. Zyada poochhne ke liye apni Gemini API key Settings mein add karein.",
     };
   }
   return {
@@ -315,5 +418,7 @@ function localizedCopy(locale: Locale) {
     disabled: "The chatbot is currently disabled.",
     missingKey: "Gemini API key is not configured.",
     serviceIssue: "Gemini could not answer right now. Please try again shortly.",
+    dailyLimit:
+      "You've used all 3 free questions for today. To ask more, add your own Gemini API key in Settings.",
   };
 }
