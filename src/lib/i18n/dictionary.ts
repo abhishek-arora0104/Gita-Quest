@@ -145,7 +145,6 @@ export const dictionaries = {
       markRead: "Mark summary as read (+50 XP)",
       saving: "Saving…",
       continue: "Continue →",
-      flashcards: "Flashcard revision →",
     },
     quiz: {
       titlePrefix: "Quiz",
@@ -206,14 +205,6 @@ export const dictionaries = {
       yourChoice: "Your answer",
       correctAnswer: "Correct answer",
       skipped: "Not answered",
-      // ── Flashcards ──
-      flashcards: "Flashcards",
-      flashcardsTitle: "Flashcard revision",
-      flashcardsBody: "Flip through the key takeaways and lessons to lock them in.",
-      flip: "Tap to flip",
-      prev: "← Prev",
-      next: "Next →",
-      shuffle: "Shuffle",
     },
     dashboard: {
       welcome: "Welcome",
@@ -501,7 +492,6 @@ export const dictionaries = {
       markRead: "सारांश पढ़ा हुआ चिह्नित करें (+50 XP)",
       saving: "सहेजा जा रहा है…",
       continue: "आगे बढ़ें →",
-      flashcards: "फ्लैशकार्ड पुनरावलोकन →",
     },
     quiz: {
       titlePrefix: "क्विज़",
@@ -562,14 +552,6 @@ export const dictionaries = {
       yourChoice: "आपका उत्तर",
       correctAnswer: "सही उत्तर",
       skipped: "उत्तर नहीं दिया",
-      // ── फ्लैशकार्ड ──
-      flashcards: "फ्लैशकार्ड",
-      flashcardsTitle: "फ्लैशकार्ड पुनरावलोकन",
-      flashcardsBody: "मुख्य बातों और सीखों को फ़्लिप करके याद रखें।",
-      flip: "फ़्लिप करने हेतु टैप करें",
-      prev: "← पिछला",
-      next: "अगला →",
-      shuffle: "फेंटें",
     },
     dashboard: {
       welcome: "स्वागत है",

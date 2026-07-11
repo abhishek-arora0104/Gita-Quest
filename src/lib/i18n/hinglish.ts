@@ -158,7 +158,6 @@ export const hinglishDictionary = {
     markRead: "Summary padha hua mark karein (+50 XP)",
     saving: "Save ho raha hai…",
     continue: "Aage badhein →",
-    flashcards: "Flashcard revision →",
   },
   quiz: {
     titlePrefix: "Quiz",
@@ -221,14 +220,6 @@ export const hinglishDictionary = {
     yourChoice: "Aapka uttar",
     correctAnswer: "Sahi uttar",
     skipped: "Jawab nahi diya",
-    // ── Flashcards ──
-    flashcards: "Flashcards",
-    flashcardsTitle: "Flashcard revision",
-    flashcardsBody: "Mukhya baaton aur seekhon ko flip karke yaad rakhein.",
-    flip: "Flip karne ke liye tap karein",
-    prev: "← Pichla",
-    next: "Agla →",
-    shuffle: "Shuffle",
   },
   dashboard: {
     welcome: "Swagat hai",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,24 +15,23 @@ type NavLink = { href: string; label: string; homeOnly: boolean };
 export function NavbarClient({
   locale,
   navLinks = [],
-  homePath,
 }: {
   locale: Locale;
   navLinks?: NavLink[];
-  homePath?: string;
 }) {
   const t = getDictionary(locale);
   const [user, setUser] = useState<User | null>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const pathname = usePathname();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Close mobile drawer when pathname changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileMenuOpen(false);
   }, [pathname]);
 

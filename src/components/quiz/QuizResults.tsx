@@ -178,13 +178,6 @@ export function QuizResults({
         >
           {t.chapter.retakeQuiz}
         </Button>
-        <Button
-          href={`/${locale}/chapters/${chapterSlug}/flashcards`}
-          variant="ghost"
-          size="lg"
-        >
-          {t.quiz.flashcards}
-        </Button>
         {nextCh ? (
           <Button
             href={`/${locale}/chapters/${nextCh.slug}`}

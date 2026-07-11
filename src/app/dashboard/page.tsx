@@ -10,6 +10,7 @@ import { DailyLoginButton } from "@/components/gamification/DailyLoginButton";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionary";
 
@@ -182,6 +183,7 @@ export default async function DashboardPage() {
           <XPBar totalXp={totalXp} t={t} />
         </div>
       </Card>
+
 
       {/* Chapter progress list */}
       <section className="mt-8">

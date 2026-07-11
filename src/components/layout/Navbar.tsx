@@ -10,8 +10,6 @@ export async function Navbar({ locale }: { locale: Locale }) {
     { href: `/${locale}/chapters`, label: t.nav.chapters, homeOnly: false },
     { href: `/${locale}/about`, label: t.nav.about, homeOnly: false },
   ];
-  const homePath = `/${locale}`;
-
   return (
     <>
       {/* Skip-to-content link for keyboard accessibility */}
@@ -39,7 +37,7 @@ export async function Navbar({ locale }: { locale: Locale }) {
             <span>Gita Quest</span>
           </Link>
 
-          <NavbarClient locale={locale} navLinks={navLinks} homePath={homePath} />
+          <NavbarClient locale={locale} navLinks={navLinks} />
         </nav>
       </NavbarScrollWrapper>
     </>
