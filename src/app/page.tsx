@@ -43,5 +43,36 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const locale = await getRequestLocale();
-  return <HomeClient locale={locale} />;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const t = getDictionary(locale);
+
+  // JSON-LD structured data for SEO: identifies the site and publisher as
+  // distinct entities (chapter pages already carry their own LearningResource).
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        name: "Gita Quest",
+        url: siteUrl,
+        description: t.home.subtitle,
+        inLanguage: LOCALE_META[locale].htmlLang,
+      },
+      {
+        "@type": "Organization",
+        name: "Gita Quest",
+        url: siteUrl,
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <HomeClient locale={locale} />
+    </>
+  );
 }

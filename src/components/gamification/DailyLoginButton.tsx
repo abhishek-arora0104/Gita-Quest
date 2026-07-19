@@ -4,9 +4,17 @@ import { useState, useTransition } from "react";
 import { claimDailyLogin } from "@/actions/claimDailyLogin";
 import type { Dictionary } from "@/lib/i18n/dictionary";
 
-export function DailyLoginButton({ t, alreadyClaimed = false }: { t: Dictionary, alreadyClaimed?: boolean }) {
-  const [claimed, setClaimed] = useState(alreadyClaimed);
+export function DailyLoginButton({ t, lastClaimedDate = null }: { t: Dictionary, lastClaimedDate?: string | null }) {
+  const [claimed, setClaimed] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  // Evaluate if claimed today on the client to avoid timezone mismatches
+  useState(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    if (lastClaimedDate === today) {
+      setClaimed(true);
+    }
+  });
 
   function handleClaim() {
     startTransition(async () => {

@@ -21,12 +21,12 @@ export function ForgotPasswordForm({ locale = "en" }: { locale?: Locale }) {
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
     });
 
-    if (error) {
-      setError(error.message);
+    if (resetError) {
+      setError(resetError.message);
       setLoading(false);
       return;
     }

@@ -15,6 +15,7 @@ type ChatRequest = {
   message?: string;
   locale?: Locale;
   history?: ChatMessage[];
+  clientDate?: string;
 };
 
 const MAX_MESSAGE_LENGTH = 1200;
@@ -49,7 +50,8 @@ export async function POST(request: Request) {
   const hasOwnKey = !!userApiKey;
 
   // ── Track daily usage via cookies + DB fallback ──
-  const today = new Date().toISOString().slice(0, 10);
+  const clientDate = body?.clientDate ?? new Date().toISOString().slice(0, 10);
+  const today = clientDate;
   const cookieStore = await cookies();
   const usageCookie = cookieStore.get("gita_daily_chat")?.value;
 
@@ -113,10 +115,19 @@ export async function POST(request: Request) {
     answer,
   });
 
-  // ── Update usage cookie and compute remaining ──
   const newUsed = currentUsed + 1;
+  const remaining = hasOwnKey ? -1 : Math.max(FREE_DAILY_LIMIT - newUsed, 0);
+
+  const response = NextResponse.json({
+    answer,
+    sources: [],
+    provider: "gemini",
+    hasOwnKey,
+    remaining,
+  });
+
   if (!hasOwnKey) {
-    cookieStore.set("gita_daily_chat", `${today}:${newUsed}`, {
+    response.cookies.set("gita_daily_chat", `${today}:${newUsed}`, {
       path: "/",
       maxAge: 86400 * 2,
       httpOnly: true,
@@ -124,15 +135,7 @@ export async function POST(request: Request) {
     });
   }
 
-  const remaining = hasOwnKey ? -1 : Math.max(FREE_DAILY_LIMIT - newUsed, 0);
-
-  return NextResponse.json({
-    answer,
-    sources: [],
-    provider: "gemini",
-    hasOwnKey,
-    remaining,
-  });
+  return response;
 }
 
 async function generateGeminiAnswer({

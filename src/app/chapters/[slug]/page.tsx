@@ -89,6 +89,8 @@ export default async function ChapterPage({
 
   const nextChapter = getNextChapterForLocale(chapter.number, locale);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
   // JSON-LD structured data for SEO.
   const jsonLd = {
     "@context": "https://schema.org",
@@ -109,11 +111,40 @@ export default async function ChapterPage({
     },
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Gita Quest",
+        item: `${siteUrl}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: t.chapter.allChapters,
+        item: `${siteUrl}/${locale}/chapters`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: chapter.title,
+        item: `${siteUrl}/${locale}/chapters/${chapter.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       {/* Breadcrumb */}

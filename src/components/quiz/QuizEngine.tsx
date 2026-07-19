@@ -288,7 +288,7 @@ export function QuizEngine({
           max={totalQuestions}
           label={t.quiz.progress}
         />
-        <LiveScore answers={answers} answerKey={answerKey} t={t} />
+        <LiveScore answers={answers} answerKey={answerKey} questionIndexes={questionIndexes} t={t} />
       </div>
 
       {/* Question card */}
@@ -437,17 +437,19 @@ function diffLabel(t: Dictionary, d: QuestionForClient["difficulty"]): string {
 function LiveScore({
   answers,
   answerKey,
+  questionIndexes,
   t,
 }: {
   answers: (number | null)[];
   answerKey: AnswerKeyEntry[];
+  questionIndexes: number[];
   t: Dictionary;
 }) {
-  const correct = answers.reduce<number>(
-    (s, a, i) => s + ((a ?? null) === answerKey[i].correctIndex ? 1 : 0),
+  const correct = questionIndexes.reduce<number>(
+    (s, idx) => s + (answers[idx] === answerKey[idx].correctIndex ? 1 : 0),
     0,
   );
-  const answered = answers.filter((a) => a !== null).length;
+  const answered = questionIndexes.filter((idx) => answers[idx] !== null).length;
   if (answered === 0) return null;
   return (
     <p className="mt-2 text-xs font-medium text-ink-muted">

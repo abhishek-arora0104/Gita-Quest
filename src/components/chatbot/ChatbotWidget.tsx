@@ -66,6 +66,7 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
           message: text,
           locale,
           history: apiHistory,
+          clientDate: new Date().toISOString().slice(0, 10),
         }),
       });
       const data = (await response.json()) as {

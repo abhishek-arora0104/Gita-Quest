@@ -71,11 +71,10 @@ export function retrieveChatContexts({
         (score, term) => score + (text.includes(term) ? 1 : 0),
         0,
       );
-      const chapterBoost = chapterHint === chapter.number ? 8 : 0;
       const titleBoost = text.includes(query.toLowerCase()) ? 3 : 0;
       return {
         chapter,
-        score: termScore + chapterBoost + titleBoost,
+        score: termScore + titleBoost,
       };
     })
     .filter((item) => item.score > 0)

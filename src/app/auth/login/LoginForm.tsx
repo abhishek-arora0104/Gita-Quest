@@ -26,7 +26,7 @@ export function LoginForm({
 }) {
   const t = getDictionary(locale);
   const router = useRouter();
-  const destination = safeRedirectPath(redirectTo) || `/${locale}/dashboard`;
+  const destination = redirectTo || `/${locale}/dashboard`;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,13 +38,13 @@ export function LoginForm({
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      setError(error.message);
+    if (signInError) {
+      setError(signInError.message);
       setLoading(false);
       return;
     }

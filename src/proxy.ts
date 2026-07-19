@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/session-refresh";
+import { requiresAuthCheck, updateSession } from "@/lib/supabase/session-refresh";
 import {
   DEFAULT_LOCALE,
   getLocaleFromPath,
@@ -15,6 +15,23 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Let Next's file-convention routes (robots.ts, sitemap.ts, opengraph-image.tsx,
+  // twitter-image.tsx, apple-icon.tsx) and the llms.txt route handler serve directly
+  // at the root instead of being caught by the locale rewrite below — og:image,
+  // twitter:image, and apple-touch-icon meta tags reference these bare paths, and
+  // crawlers (social or AI) won't reliably follow a redirect to fetch them.
+  const ROOT_ONLY_PATHS = [
+    "/robots.txt",
+    "/sitemap.xml",
+    "/opengraph-image",
+    "/twitter-image",
+    "/apple-icon",
+    "/llms.txt",
+  ];
+  if (ROOT_ONLY_PATHS.includes(pathname)) {
+    return NextResponse.next();
+  }
+
   if (pathname === "/") {
     const cookieLocale = request.cookies.get("gita-locale")?.value;
     const preferredLocale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
@@ -26,7 +43,12 @@ export async function proxy(request: NextRequest) {
     const headers = new Headers(request.headers);
     headers.set("x-gita-locale", locale);
 
-    const authResponse = await updateSession(request);
+    // Only pay the Supabase network round-trip on routes that actually need
+    // the auth guard — the navbar resolves the logged-in user client-side,
+    // so public pages don't need a server-verified user here.
+    const authResponse = requiresAuthCheck(stripLocaleFromPath(pathname))
+      ? await updateSession(request)
+      : NextResponse.next({ request });
     if (authResponse.headers.get("location")) {
       return authResponse;
     }

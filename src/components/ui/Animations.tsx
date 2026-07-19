@@ -23,6 +23,16 @@ export function ScrollReveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // Reveal immediately if already in (or near) the viewport on mount, so
+    // above-the-fold content isn't stuck waiting on an IntersectionObserver
+    // callback that browsers can delay or withhold entirely (e.g. hidden tabs).
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

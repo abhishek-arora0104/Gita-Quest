@@ -13,6 +13,18 @@ const PROTECTED_ROUTES = ["/dashboard", "/settings"];
 const AUTH_ROUTES = ["/auth/login", "/auth/signup"];
 
 /**
+ * Whether a (locale-stripped) pathname needs the auth guard in `updateSession`.
+ * Lets callers skip the Supabase network round-trip on public routes, where
+ * the navbar already resolves the logged-in user client-side.
+ */
+export function requiresAuthCheck(pathname: string): boolean {
+  return (
+    PROTECTED_ROUTES.some((r) => pathname.startsWith(r)) ||
+    AUTH_ROUTES.some((r) => pathname.startsWith(r))
+  );
+}
+
+/**
  * Refreshes the Supabase session on every request, stores it back in cookies,
  * and enforces route-level auth guards (protected + guest-only routes).
  */

@@ -133,7 +133,7 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-3">
           <DailyLoginButton 
             t={t} 
-            alreadyClaimed={profile?.daily_login_claimed === new Date().toISOString().slice(0, 10)} 
+            lastClaimedDate={profile?.daily_login_claimed ?? null} 
           />
           <LogoutButton locale={locale} />
         </div>
@@ -258,7 +258,7 @@ export default async function DashboardPage() {
           {earnedBadgeIds.size} {t.dashboard.earnedOf}
         </p>
         <div className="mt-4">
-          <BadgeGrid earnedIds={earnedBadgeIds} t={t} />
+          <BadgeGrid earnedIds={Array.from(earnedBadgeIds)} t={t} />
         </div>
       </section>
     </div>

@@ -48,7 +48,15 @@ export function updateStreak(input: {
   const diff = daysBetween(input.lastActiveDate, today);
 
   let newStreak: number;
-  if (diff <= 0) {
+  if (diff < 0) {
+    // Prevent client date manipulation to restore a broken streak
+    return {
+      currentStreak: input.currentStreak,
+      longestStreak: input.longestStreak,
+      lastActiveDate: input.lastActiveDate,
+      incremented: false,
+    };
+  } else if (diff === 0) {
     // Same day already active — no change.
     newStreak = input.currentStreak;
     return {

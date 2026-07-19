@@ -72,6 +72,34 @@ export function HomeClient({ locale }: { locale: Locale }) {
         </div>
       </section>
 
+      {/* Why Gita Quest */}
+      <section className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+        <ScrollReveal>
+          <h2 className="font-serif text-3xl font-semibold text-maroon">
+            {t.home.builtTitle}
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-ink-soft">
+            {t.home.builtBody}
+          </p>
+          <ul className="mx-auto mt-8 grid max-w-2xl gap-3 text-left sm:grid-cols-2">
+            {[
+              t.home.feature1,
+              t.home.feature2,
+              t.home.feature3,
+              t.home.feature4,
+              t.home.feature5,
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2 text-sm text-ink-soft">
+                <span aria-hidden="true" className="mt-0.5 text-saffron">
+                  ✓
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </ScrollReveal>
+      </section>
+
       {/* How it works */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <ScrollReveal>

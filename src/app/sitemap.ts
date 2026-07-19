@@ -22,7 +22,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const locale of LOCALES) {
     entries.push({
       url: `${siteUrl}/${locale}`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 1,
       alternates: alternatesFor(""),
@@ -33,7 +32,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const locale of LOCALES) {
     entries.push({
       url: `${siteUrl}/${locale}/about`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
       alternates: alternatesFor("/about"),
@@ -44,7 +42,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const locale of LOCALES) {
     entries.push({
       url: `${siteUrl}/${locale}/chapters`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,
       alternates: alternatesFor("/chapters"),
@@ -56,7 +53,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     for (const slug of chapterSlugs) {
       entries.push({
         url: `${siteUrl}/${locale}/chapters/${slug}`,
-        lastModified: new Date(),
         changeFrequency: "weekly",
         priority: 0.8,
         alternates: alternatesFor(`/chapters/${slug}`),

@@ -4,7 +4,7 @@ import { LOCALES } from "@/lib/i18n/config";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 /** Paths that should never be indexed, regardless of locale. */
-const PROTECTED_PATHS = ["/dashboard", "/profile", "/settings", "/auth/"];
+const PROTECTED_PATHS = ["/dashboard", "/settings", "/auth/"];
 
 function disallowEntries(): string[] {
   const paths: string[] = [];

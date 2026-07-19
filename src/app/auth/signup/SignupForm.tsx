@@ -24,7 +24,7 @@ export function SignupForm({ locale = "en" }: { locale?: Locale }) {
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -33,8 +33,8 @@ export function SignupForm({ locale = "en" }: { locale?: Locale }) {
       },
     });
 
-    if (error) {
-      setError(error.message);
+    if (signUpError) {
+      setError(signUpError.message);
       setLoading(false);
       return;
     }
